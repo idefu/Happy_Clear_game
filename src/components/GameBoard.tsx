@@ -80,6 +80,9 @@ export default function GameBoard({
     sound.toggleSound(soundEnabled);
   }, [soundEnabled]);
 
+  const animationActiveRef = useRef(false);
+  const startAnimationLoopRef = useRef<() => void>(() => {});
+
   // Handle particle updating in 60fps loop
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -87,7 +90,7 @@ export default function GameBoard({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId: number;
+    let animId: number | null = null;
 
     const resizeCanvas = () => {
       const container = boardContainerRef.current;
@@ -102,8 +105,15 @@ export default function GameBoard({
 
     // Particle tick updates
     const update = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
       const particles = particlesRef.current;
+      if (particles.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        animationActiveRef.current = false;
+        animId = null;
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -125,8 +135,8 @@ export default function GameBoard({
         ctx.save();
         ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = p.color;
+
+        // HIGH PERFORMANCE: shadowBlur is deleted because it crashes mobile GPU
 
         if (p.type === 'sparkle') {
           // Draw a small star
@@ -159,7 +169,7 @@ export default function GameBoard({
         } else if (p.type === 'ring') {
           // Draw shockwave expanding ring
           ctx.strokeStyle = p.color;
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 2.5;
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size * (1 - p.alpha) * 3, 0, Math.PI * 2);
           ctx.stroke();
@@ -184,10 +194,18 @@ export default function GameBoard({
       animId = requestAnimationFrame(update);
     };
 
-    animId = requestAnimationFrame(update);
+    const startAnimationLoop = () => {
+      if (!animationActiveRef.current) {
+        animationActiveRef.current = true;
+        if (animId) cancelAnimationFrame(animId);
+        animId = requestAnimationFrame(update);
+      }
+    };
+
+    startAnimationLoopRef.current = startAnimationLoop;
 
     return () => {
-      cancelAnimationFrame(animId);
+      if (animId) cancelAnimationFrame(animId);
       window.removeEventListener('resize', resizeCanvas);
     };
   }, []);
@@ -210,11 +228,11 @@ export default function GameBoard({
 
     const sparkles = particlesRef.current;
 
-    // 1. Spawns sparkle burst
-    const burstCount = action === 'HYPER_EXPLODER' ? 35 : action === 'BOMB' ? 45 : 12;
+    // 1. Spawns sparkle burst - reduced particle density for high refresh rate performance
+    const burstCount = action === 'HYPER_EXPLODER' ? 18 : action === 'BOMB' ? 24 : 8;
     for (let i = 0; i < burstCount; i++) {
       const angle = Math.random() * Math.PI * 2;
-      const speed = action === 'BOMB' ? (2 + Math.random() * 5.5) : (1.5 + Math.random() * 4.5);
+      const speed = action === 'BOMB' ? (1.5 + Math.random() * 4) : (1.2 + Math.random() * 3);
       
       sparkles.push({
         id: Math.random().toString(),
@@ -224,9 +242,9 @@ export default function GameBoard({
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         color: action === 'HYPER_EXPLODER' ? getRandomRainbowColor() : action === 'BOMB' ? (Math.random() < 0.5 ? '#ef4444' : '#f97316') : color,
-        size: action === 'BOMB' ? (4 + Math.random() * 7) : (3 + Math.random() * 6),
+        size: action === 'BOMB' ? (3 + Math.random() * 5) : (2 + Math.random() * 4),
         alpha: 1,
-        decay: action === 'BOMB' ? (0.012 + Math.random() * 0.015) : (0.015 + Math.random() * 0.02)
+        decay: action === 'BOMB' ? (0.015 + Math.random() * 0.015) : (0.02 + Math.random() * 0.02)
       });
     }
 
@@ -240,9 +258,9 @@ export default function GameBoard({
         vx: 0,
         vy: 0,
         color: action === 'HYPER_EXPLODER' ? '#f59e0b' : action === 'BOMB' ? '#f97316' : color,
-        size: action === 'BOMB' ? Math.max(cellWidth, cellHeight) * 1.8 : Math.max(cellWidth, cellHeight) * 0.8,
+        size: action === 'BOMB' ? Math.max(cellWidth, cellHeight) * 1.5 : Math.max(cellWidth, cellHeight) * 0.7,
         alpha: 1,
-        decay: action === 'BOMB' ? 0.03 : 0.04
+        decay: action === 'BOMB' ? 0.04 : 0.05
       });
     }
 
@@ -258,9 +276,9 @@ export default function GameBoard({
         lengthX: canvas.width,
         lengthY: 0,
         color: '#f43f5e',
-        size: 15,
+        size: 10,
         alpha: 1,
-        decay: 0.06
+        decay: 0.08
       });
     } else if (action === 'COL_BLASTER') {
       sparkles.push({
@@ -273,11 +291,14 @@ export default function GameBoard({
         lengthX: 0,
         lengthY: canvas.height,
         color: '#06b6d4',
-        size: 15,
+        size: 10,
         alpha: 1,
-        decay: 0.06
+        decay: 0.08
       });
     }
+
+    // Dynamic start
+    startAnimationLoopRef.current();
   };
 
   // Helper colors for hyper explosers
@@ -498,7 +519,7 @@ export default function GameBoard({
     <div className="flex flex-col items-center justify-center space-y-3.5 w-full" id="board-container-section">
       <div 
         ref={boardContainerRef}
-        className="w-full relative aspect-square max-w-[480px] bg-slate-950/80 border-4 border-slate-800 rounded-3xl p-3.5 shadow-2xl relative grid-pattern touch-none select-none overflow-hidden"
+        className="w-full relative aspect-square max-w-[min(100vw-16px,620px)] bg-slate-950/60 border-2 sm:border-4 border-slate-800 rounded-2xl p-1.5 sm:p-3 shadow-2xl grid-pattern touch-none select-none overflow-hidden"
         style={{
           boxShadow: '0 25px 50px -12px rgba(15, 23, 42, 0.8), inset 0 1px 0 rgba(255,255,255,0.06)'
         }}
@@ -512,7 +533,7 @@ export default function GameBoard({
 
         {/* Board Tiles Layout */}
         <div
-          className="w-full h-full gap-1.5"
+          className="w-full h-full gap-1 sm:gap-1.5"
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
@@ -546,22 +567,21 @@ export default function GameBoard({
                   onClick={() => handleCellClick(r, c)}
                   onMouseDown={(e) => handleDragStart(r, c, e.clientX, e.clientY)}
                   onTouchStart={(e) => handleTouchStart(r, c, e)}
-                  className={`relative flex items-center justify-center h-full w-full rounded-xl transition-all cursor-pointer ${
+                  className={`relative flex items-center justify-center h-full w-full rounded-lg transition-all cursor-pointer ${
                     isCellSelected 
                       ? 'bg-slate-800/80 ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-950 shadow-inner'
                       : isHinted
-                      ? 'bg-slate-900 ring-4 ring-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.8)] border border-amber-300 z-10 animate-pulse'
+                      ? 'bg-slate-900 ring-2 sm:ring-4 ring-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.8)] border border-amber-300 z-10 animate-pulse'
                       : 'bg-slate-900/40 border border-slate-800/60'
                   }`}
                   id={`board-cell-${r}-${c}`}
                 >
                   {/* Glass backing design details */}
-                  <span className="absolute inset-0.5 rounded-lg border border-white/5 pointer-events-none" />
+                  <span className="absolute inset-0.5 rounded-md border border-white/5 pointer-events-none" />
 
                   {/* Render Tile content */}
                   {cell && (
                     <motion.div
-                      layoutId={`tile_${cell.id}`}
                       initial={cell.isNew ? { scale: 0, opacity: 0 } : false}
                       animate={
                         cell.isEliminating 
@@ -616,23 +636,23 @@ export default function GameBoard({
 
                       {/* Specialty micro badges */}
                       {cell.special === 'ROW_BLASTER' && (
-                        <span className="absolute bottom-1 right-1 px-1 rounded text-[9px] bg-pink-600/95 text-white font-sans leading-none border border-pink-400/30 font-bold shadow-md select-none transform scale-90">
-                          ↔ 激光
+                        <span className="absolute bottom-1 right-1 px-1 rounded text-[10px] bg-pink-600/95 text-white font-sans leading-none border border-pink-400/30 font-bold shadow-md select-none transform scale-90">
+                          ↔
                         </span>
                       )}
                       {cell.special === 'COL_BLASTER' && (
-                        <span className="absolute bottom-1 right-1 px-1 rounded text-[9px] bg-cyan-600/95 text-white font-sans leading-none border border-cyan-400/30 font-bold shadow-md select-none transform scale-90">
-                          ↕ 激光
+                        <span className="absolute bottom-1 right-1 px-1 rounded text-[10px] bg-cyan-600/95 text-white font-sans leading-none border border-cyan-400/30 font-bold shadow-md select-none transform scale-90">
+                          ↕
                         </span>
                       )}
                       {cell.special === 'HYPER_EXPLODER' && (
-                        <span className="absolute bottom-1 right-1 px-1 rounded text-[9px] bg-amber-500 text-slate-950 font-extrabold leading-none border border-amber-300 shadow-sm select-none transform scale-90 animate-pulse">
-                          ☢ 核爆
+                        <span className="absolute bottom-1 right-1 px-1 rounded text-[10px] bg-amber-500 text-slate-950 font-extrabold leading-none border border-amber-300 shadow-sm select-none transform scale-90 animate-pulse">
+                          ☢
                         </span>
                       )}
                       {cell.special === 'BOMB' && (
-                        <span className="absolute bottom-1 right-1 px-1 rounded text-[9px] bg-red-600/95 text-white font-bold leading-none border border-red-400 shadow-md select-none transform scale-90">
-                          💣 炸弹
+                        <span className="absolute bottom-1 right-1 px-1 rounded text-[10px] bg-red-600/95 text-white font-bold leading-none border border-red-400 shadow-md select-none transform scale-90">
+                          💣
                         </span>
                       )}
 
@@ -663,11 +683,6 @@ export default function GameBoard({
         </div>
       </div>
 
-      {/* Controller Guide Helper label */}
-      <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-        <Zap className="h-3.5 w-3.5 text-yellow-400 shrink-0" />
-        <span>支持鼠标拖拽，或轻击先选、再点相邻交换</span>
-      </div>
     </div>
   );
 }

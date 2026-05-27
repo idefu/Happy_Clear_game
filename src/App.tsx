@@ -11,7 +11,6 @@ import ScoreBoard from './components/ScoreBoard';
 import GameBoard from './components/GameBoard';
 import LevelSelector from './components/LevelSelector';
 import WinLoseModal from './components/WinLoseModal';
-import HelpManual from './components/HelpManual';
 import { sound } from './utils/sound';
 import { Volume2, VolumeX, Sparkles, RefreshCcw, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -23,7 +22,6 @@ export default function App() {
   const [activeLevel, setActiveLevel] = useState<LevelConfig | null>(null);
   const currentLevelRef = useRef<LevelConfig | null>(null);
   currentLevelRef.current = activeLevel;
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Sound settings
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -543,60 +541,8 @@ export default function App() {
       {/* Absolute background visual ambient details */}
       <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-indigo-950/20 via-slate-900/0 to-slate-950/0 pointer-events-none" />
 
-      {/* Persistent global Header */}
-      <header className="border-b border-slate-800/80 bg-slate-950/70 p-4 sticky top-0 z-40 backdrop-blur-md shadow-sm">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={handleBackToMenu}>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg font-black tracking-tighter">
-              <Sparkles className="h-5 w-5 text-indigo-100 animate-pulse" />
-            </div>
-            <div>
-              <span className="text-sm font-extrabold tracking-tight block leading-none">
-                快乐消消乐
-              </span>
-              <span className="text-[10px] font-mono text-slate-400">
-                Happy Match-3 Game
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* PROCEDURAL PROCEDURAL procedural audio controls */}
-            <button
-              onClick={() => setSoundEnabled(prev => !prev)}
-              className="flex h-9 px-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-all text-slate-300 items-center gap-1.5 text-xs font-semibold shadow-sm cursor-pointer"
-              title={soundEnabled ? "静音游戏" : "开启声音"}
-              id="sound-toggle-btn"
-            >
-              {soundEnabled ? (
-                <>
-                  <Volume2 className="h-4 w-4 text-emerald-400" />
-                  <span className="hidden sm:inline">声音开启</span>
-                </>
-              ) : (
-                <>
-                  <VolumeX className="h-4 w-4 text-slate-400" />
-                  <span className="hidden sm:inline">已静音</span>
-                </>
-              )}
-            </button>
-            
-            {activeLevel && (
-              <button
-                onClick={handleResetLevel}
-                className="flex h-9 px-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition-all text-slate-300 items-center justify-center cursor-pointer shadow-sm"
-                title="重置当前关卡"
-                id="reset-icon-btn"
-              >
-                <RefreshCcw className="h-4 w-4 text-cyan-400" />
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
-
       {/* Main Container screen elements */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6 flex flex-col justify-start">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-2 sm:px-4 py-3 flex flex-col justify-start">
         <AnimatePresence mode="wait">
           {!activeLevel ? (
             /* SELECTOR INTERFACES */
@@ -610,8 +556,9 @@ export default function App() {
               <LevelSelector
                 levels={LEVELS}
                 onSelectLevel={handleSelectLevel}
-                onOpenHelp={() => setIsHelpOpen(true)}
                 highScores={highScores}
+                soundEnabled={soundEnabled}
+                onToggleSound={() => setSoundEnabled(!soundEnabled)}
               />
             </motion.div>
           ) : (
@@ -621,32 +568,33 @@ export default function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              className="space-y-6 w-full max-w-xl mx-auto flex-1 flex flex-col justify-start py-2"
+              className="w-full max-w-5xl mx-auto flex-1 flex flex-col justify-start py-0.5"
             >
-              {/* Score HUD statistics panel */}
+              {/* Score HUD statistics panel wrapping GameBoard as children */}
               <ScoreBoard
                 level={activeLevel}
                 score={score}
                 movesRemaining={movesRemaining}
                 goalsProgress={goalsProgress}
                 isIceHighlighted={isIceHighlighted}
-                onOpenHelp={() => setIsHelpOpen(true)}
+                soundEnabled={soundEnabled}
+                onToggleSound={() => setSoundEnabled(!soundEnabled)}
                 onResetLevel={handleResetLevel}
                 onBackToMenu={handleBackToMenu}
                 onIceGoalClick={handleIceClicked}
-              />
-
-              {/* Grid cell board */}
-              <GameBoard
-                board={board}
-                level={activeLevel}
-                isAnimating={isAnimating}
-                onSwap={handleSwapAction}
-                deletedPoints={deletedPoints}
-                soundEnabled={soundEnabled}
-                onIceClicked={handleIceClicked}
-                isIceHighlightActive={isIceHighlighted}
-              />
+              >
+                {/* Grid cell board */}
+                <GameBoard
+                  board={board}
+                  level={activeLevel}
+                  isAnimating={isAnimating}
+                  onSwap={handleSwapAction}
+                  deletedPoints={deletedPoints}
+                  soundEnabled={soundEnabled}
+                  onIceClicked={handleIceClicked}
+                  isIceHighlightActive={isIceHighlighted}
+                />
+              </ScoreBoard>
             </motion.div>
           )}
         </AnimatePresence>
@@ -669,14 +617,6 @@ export default function App() {
       </AnimatePresence>
 
       {/* Modals & Dialog overlays */}
-      <AnimatePresence>
-        {isHelpOpen && (
-          <HelpManual
-            isOpen={isHelpOpen}
-            onClose={() => setIsHelpOpen(false)}
-          />
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {(isWon || isLost) && activeLevel && (

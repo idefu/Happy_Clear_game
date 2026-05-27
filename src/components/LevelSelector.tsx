@@ -3,200 +3,304 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Play, Sparkles, Trophy, Flame, HelpCircle, Layers, IceCream, Star, Footprints } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Lock, Volume2, VolumeX, Grid, ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 import { LevelConfig } from '../types';
+import startPic from '../../pic/start.png';
 
 interface LevelSelectorProps {
   levels: LevelConfig[];
   onSelectLevel: (levelId: number) => void;
-  onOpenHelp: () => void;
   highScores: { [key: number]: number };
+  soundEnabled: boolean;
+  onToggleSound: () => void;
 }
 
 export default function LevelSelector({
   levels,
   onSelectLevel,
-  onOpenHelp,
-  highScores
+  highScores,
+  soundEnabled,
+  onToggleSound
 }: LevelSelectorProps) {
-  // Stagger animation container
+  // Hide the level grid by default, clicking '关卡选择' shows it
+  const [showGrid, setShowGrid] = useState(false);
+
+  // Find the highest unlocked stage to play immediately
+  const highestUnlockedId = React.useMemo(() => {
+    let highest = 1;
+    for (const lvl of levels) {
+      const isFirst = lvl.id === 1;
+      const prevLevelCompleted = highScores[lvl.id - 1] !== undefined && highScores[lvl.id - 1] > 0;
+      if (isFirst || prevLevelCompleted) {
+        highest = lvl.id;
+      }
+    }
+    return highest;
+  }, [levels, highScores]);
+
+  // Helper code to map score to star count (1 to 3 stars)
+  const getLevelStarsCount = React.useCallback((level: LevelConfig) => {
+    const score = highScores[level.id] || 0;
+    if (score <= 0) return 0;
+    if (score >= level.scoreGoal) return 3;
+    if (score >= level.scoreGoal * 0.7) return 2;
+    return 1;
+  }, [highScores]);
+
+  // Total stars across the board
+  const totalStarsEarned = React.useMemo(() => {
+    return levels.reduce((acc, lvl) => acc + getLevelStarsCount(lvl), 0);
+  }, [levels, getLevelStarsCount]);
+
+  const maxStarsPossible = levels.length * 3;
+
   const container = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.02
       }
     }
   };
 
   const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
+    hidden: { scale: 0.85, opacity: 0 },
+    show: { scale: 1, opacity: 1, transition: { type: 'spring', stiffness: 200, damping: 15 } }
   };
 
-  return (
-    <div className="w-full max-w-5xl mx-auto py-6 px-4 space-y-8" id="level-selector-screen">
-      
-      {/* Hero Welcome Unit */}
-      <div className="text-center space-y-4 pb-4">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 px-4 py-1.5 text-xs font-semibold text-indigo-300 border border-indigo-500/20 shadow-md"
-        >
-          <Sparkles className="h-4 w-4 text-indigo-400" />
-          <span>全新高帧高能炫彩快乐消除游戏</span>
-        </motion.div>
+  // IF GRID IS HIDDEN, SCREEN ONLY SHOWS MAIN THEMED COVER (LOBBY VIEW)
+  if (!showGrid) {
+    return (
+      <div className="w-full max-w-2xl mx-auto py-2 px-2 flex justify-center items-center" id="lobby-view-wrapper">
+        <div className="relative w-full rounded-2xl overflow-hidden border-2 border-amber-900/60 shadow-2xl bg-slate-950 flex flex-col justify-end items-center px-4 py-8 sm:py-12 md:py-16 text-center min-h-[460px] sm:min-h-[520px] md:min-h-[580px] transition-all">
+          
+          {/* Background image covering responsively */}
+          <img 
+            src={startPic} 
+            alt="Start Screen Cover" 
+            className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none brightness-[0.80] contrast-[1.05]"
+            referrerPolicy="no-referrer"
+          />
 
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-none bg-gradient-to-r from-indigo-200 via-indigo-100 to-indigo-300 bg-clip-text text-transparent py-1">
-          快乐消消乐
-        </h1>
-        <p className="max-w-xl mx-auto text-sm text-slate-300 font-sans font-normal">
-          拖动相同图片，连击3个或以上以消除。巧用全场共振核爆与行列等离子爆破，粉碎霜层，解锁不同不规则形状的迷宫！
-        </p>
+          {/* Vignette styling overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/55 pointer-events-none" />
 
-        <div className="flex justify-center gap-3 pt-2">
-          <button
-            onClick={onOpenHelp}
-            className="flex items-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700/90 text-slate-200 border border-slate-700 px-5 py-2 text-xs font-semibold hover:shadow-lg transition-all"
-            id="levels-btn-help"
-          >
-            <HelpCircle className="h-4 w-4 text-indigo-400" />
-            <span>游戏指南 & 爆破公式</span>
-          </button>
+          {/* Floated top-right audio mute button */}
+          <div className="absolute top-3 right-3 z-30">
+            <button
+              onClick={onToggleSound}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/80 border border-slate-700/60 text-slate-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-md backdrop-blur-md"
+              id="lobby-sound-btn"
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-4.5 w-4.5 text-emerald-400" />
+              ) : (
+                <VolumeX className="h-4.5 w-4.5 text-slate-500" />
+              )}
+            </button>
+          </div>
+
+          {/* Visual Header content */}
+          <div className="relative z-25 w-full flex flex-col items-center max-w-sm space-y-6">
+            <div className="space-y-1.5 px-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-wider text-rose-50 drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] font-sans">
+                快乐消消乐
+              </h1>
+              <p className="text-emerald-450 font-mono text-[10px] sm:text-xs font-black tracking-widest uppercase drop-shadow-[0_2px_5px_rgba(0,0,0,0.9)]">
+                ★ HAPPY ELIMINATION ADVENTURE ★
+              </p>
+            </div>
+
+            {/* Middle decorative emblem */}
+            <div className="h-20 sm:h-28 w-20 sm:w-28 bg-white/5 border border-white/10 rounded-full flex items-center justify-center shadow-lg relative glow-effect animate-bounce duration-3000">
+              <div className="absolute inset-2 rounded-full border border-dashed border-amber-500/45" />
+              <span className="text-3xl sm:text-4xl">🐱</span>
+            </div>
+
+            {/* Lower Stack Action Buttons */}
+            <div className="w-full space-y-3 px-4">
+              <button
+                onClick={() => onSelectLevel(highestUnlockedId)}
+                className="w-full py-3 sm:py-4 bg-gradient-to-b from-amber-505 via-amber-600 to-amber-700 hover:from-amber-450 hover:to-amber-650 text-white rounded-xl font-extrabold text-base transition-transform active:scale-95 shadow-[0_5px_15px_rgba(217,119,6,0.5)] border-2 border-amber-400/40 cursor-pointer flex items-center justify-center gap-2"
+                id="lobby-primary-play-btn"
+              >
+                <Play className="h-5 w-5 fill-current text-white animate-pulse" />
+                <span>开始对局</span>
+              </button>
+
+              <button
+                onClick={() => setShowGrid(true)}
+                className="w-full py-3 bg-gradient-to-b from-slate-900 to-slate-950 text-slate-100 hover:text-white rounded-xl font-bold text-sm transition-transform active:scale-95 shadow-md border border-amber-900/35 cursor-pointer flex items-center justify-center gap-1.5 bg-slate-950/70 backdrop-blur-sm"
+                id="lobby-custom-stages-btn"
+              >
+                <Grid className="h-4 w-4 text-amber-500" />
+                <span>关卡选择</span>
+              </button>
+            </div>
+
+            {/* Bottom mini footnote */}
+            <span className="text-[10px] font-mono text-amber-500/80 drop-shadow font-bold bg-amber-955/30 px-2.5 py-0.5 rounded-full select-none">
+              当前可直接挑战第 {highestUnlockedId} 关
+            </span>
+          </div>
+
         </div>
       </div>
+    );
+  }
 
-      {/* Levels list grid */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-slate-200 flex items-center gap-2 font-sans tracking-tight">
-            <Layers className="h-5 w-5 text-indigo-400" />
-            <span>选择关卡 (Shatter the Levels)</span>
-          </h2>
-          <span className="text-xs text-slate-400 font-medium">共 6 种不规则玩法模式</span>
+  // IF GRID IS UNHIDDEN, SHOW THE STAGE MAP
+  return (
+    <div className="w-full max-w-2xl mx-auto py-4 px-3 flex flex-col space-y-4" id="level-selector-screen">
+      
+      {/* Dynamic top bar with general stats and return controls */}
+      <div className="flex items-center justify-between px-1" id="lobby-grid-header">
+        <button
+          onClick={() => setShowGrid(false)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/80 border border-amber-900 hover:bg-amber-900 text-xs text-amber-100 font-bold transition-all cursor-pointer select-none active:scale-95 shadow-md"
+          id="back-to-lobby-btn"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 text-amber-300" />
+          <span>返回大厅</span>
+        </button>
+
+        {/* Compact Sound Toggle control directly in header */}
+        <button
+          onClick={onToggleSound}
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-950/80 border border-amber-900 hover:bg-amber-900 text-amber-200 cursor-pointer active:scale-95 shadow-md"
+          id="sound-toggle-btn"
+        >
+          {soundEnabled ? (
+            <Volume2 className="h-4 w-4 text-emerald-400" />
+          ) : (
+            <VolumeX className="h-4 w-4 text-amber-500" />
+          )}
+        </button>
+      </div>
+
+      {/* THE CARDBOARD MAP MAIN PANEL */}
+      <div className="relative w-full rounded-3xl border-4 border-amber-950 bg-gradient-to-br from-[#dfa977] via-[#ca905a] to-[#b77b47] p-5 md:p-8 shadow-2xl overflow-hidden min-h-[500px] flex flex-col justify-between" id="cardboard-panel-container">
+        
+        {/* Packing tape in the dead center running top to bottom */}
+        <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-14 sm:w-16 bg-white/20 border-l border-r border-[#ffffff1c] backdrop-blur-[0.5px] pointer-events-none z-0" />
+
+        {/* Top-Right Big Playful Star Progress Count (e.g. 33/75 ⭐️) */}
+        <div className="relative z-10 flex justify-end mb-4 pr-1">
+          <div className="flex items-center gap-1 bg-amber-950/30 px-3 py-1 rounded-full border border-amber-900/35 backdrop-blur-sm select-none">
+            <span className="font-sans font-black text-xl text-amber-950 tracking-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.45)]">
+              {totalStarsEarned}/{maxStarsPossible}
+            </span>
+            <span className="text-xl text-yellow-400 drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.5)] animate-bounce duration-4000">
+              ⭐
+            </span>
+          </div>
         </div>
 
+        {/* The 5-Column Level Grid Layout */}
         <motion.div
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+          className="relative z-10 grid grid-cols-5 gap-y-6 gap-x-2.5 sm:gap-x-4 md:gap-x-5 flex-1 content-start py-2"
         >
-          {levels.map((level) => {
-            const levelHighScore = highScores[level.id] || 0;
-            const hasIce = level.layout.flat().includes(2);
-            const hasSpecialGoals = !!level.specialGoals;
+          {levels.map((level, idx) => {
+            const isFirst = level.id === 1;
+            const prevLevelCompleted = highScores[level.id - 1] !== undefined && highScores[level.id - 1] > 0;
+            const isUnlocked = isFirst || prevLevelCompleted;
+            const starsWon = getLevelStarsCount(level);
+            const hasScore = highScores[level.id] > 0;
+
+            // Generate alternative playful tilts for cartoon tiles
+            const tiltedClass = idx % 3 === 0 
+              ? 'rotate-3' 
+              : idx % 3 === 1 
+                ? '-rotate-3' 
+                : 'rotate-1';
 
             return (
               <motion.div
                 key={level.id}
                 variants={item}
-                whileHover={{ y: -4, transition: { duration: 0.15 } }}
-                className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-slate-900 border border-slate-800 hover:border-slate-700 p-5 transition-all shadow-xl hover:shadow-indigo-950/20 group"
+                whileHover={isUnlocked ? { scale: 1.06, rotate: 0 } : {}}
+                whileTap={isUnlocked ? { scale: 0.94 } : {}}
+                onClick={() => {
+                  if (isUnlocked) {
+                    onSelectLevel(level.id);
+                  }
+                }}
+                className={`relative aspect-square rounded-2xl transition-all select-none cursor-pointer ${tiltedClass} ${
+                  isUnlocked
+                    ? 'bg-gradient-to-b from-[#569bef] via-[#488fe6] to-[#367cd3] border-2 border-white text-white shadow-[0_5px_0_#1b4070] active:translate-y-1 active:shadow-none'
+                    : 'bg-[#cfa579] border border-[#a67446] text-amber-950 shadow-[0_5px_0_#7d522b] cursor-not-allowed opacity-[0.93]'
+                }`}
                 id={`level-card-${level.id}`}
               >
-                {/* Background glow overlay */}
-                <div className="absolute top-0 right-0 -mr-4 -mt-4 p-12 bg-indigo-600/5 rounded-full blur-2xl group-hover:bg-indigo-600/10 transition-all pointer-events-none" />
-
-                <div className="space-y-3.5">
-                  {/* Card head */}
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-black px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                      STAGE 0{level.id}
-                    </span>
-                    
-                    {levelHighScore > 0 && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 font-mono">
-                        <Trophy className="h-3 w-3" /> HS: {levelHighScore}
+                
+                {/* Tile content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-1">
+                  {isUnlocked ? (
+                    <>
+                      {/* Playful thick number lettering */}
+                      <span className="font-sans font-extrabold text-2xl sm:text-3xl text-white tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                        {level.id}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <div>
-                    <h3 className="text-lg font-black font-sans leading-tight text-white group-hover:text-indigo-200 transition-colors">
-                      {level.chineseName}
-                    </h3>
-                    <p className="text-xs font-semibold text-slate-400 italic mt-0.5">
-                      {level.name}
-                    </p>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-xs text-slate-300 leading-relaxed font-sans font-normal h-12 overflow-hidden">
-                    {level.chineseDescription}
-                  </p>
-
-                  {/* Badges */}
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {hasIce && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-300 bg-cyan-950/40 border border-cyan-500/20 px-2 py-0.5 rounded-full">
-                        <IceCream className="h-2.5 w-2.5 shrink-0 text-cyan-400" />
-                        霜层封锁
-                      </span>
-                    )}
-                    {level.specialGoals?.letter && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-300 bg-amber-950/40 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                        <Star className="h-2.5 w-2.5 shrink-0 text-amber-400" />
-                        指定收集
-                      </span>
-                    )}
-                    {level.specialGoals?.totalEliminations && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-yellow-300 bg-yellow-950/40 border border-yellow-500/20 px-2 py-0.5 rounded-full">
-                        <Flame className="h-2.5 w-2.5 shrink-0 text-yellow-400" />
-                        大量消除
-                      </span>
-                    )}
-                    {level.specialGoals?.maxCombo && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-pink-300 bg-pink-950/40 border border-pink-500/20 px-2 py-0.5 rounded-full">
-                        <Sparkles className="h-2.5 w-2.5 shrink-0 text-pink-400" />
-                        高阶连消
-                      </span>
-                    )}
-                    {!hasSpecialGoals && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-300 bg-indigo-950/40 border border-indigo-500/20 px-2 py-0.5 rounded-full">
-                        <Play className="h-2.5 w-2.5 shrink-0 text-indigo-400 animate-pulse" />
-                        积分挑战关
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Limits and Points */}
-                  <div className="grid grid-cols-2 gap-2 border-t border-slate-800/80 pt-3 text-[11px] font-mono text-slate-400">
-                    <div className="flex items-center gap-1 bg-slate-950/30 py-1 px-1.5 rounded-lg">
-                      <Trophy className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
-                      <span>目标: {level.scoreGoal} 分</span>
+                    </>
+                  ) : (
+                    <div className="flex h-7 w-7 rounded-full bg-amber-900/10 items-center justify-center border border-amber-900/15">
+                      <Lock className="h-3.5 w-3.5 text-amber-950/70" />
                     </div>
-                    <div className="flex items-center gap-1 bg-slate-950/30 py-1 px-1.5 rounded-lg">
-                      <Footprints className="h-3.5 w-3.5 text-pink-500 shrink-0" />
-                      <span>限: {level.movesLimit} 步内</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
-                {/* Launch Button */}
-                <button
-                  onClick={() => onSelectLevel(level.id)}
-                  className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-indigo-600 group-hover:bg-indigo-500 py-2.5 text-xs font-bold text-white transition-all shadow-md group-hover:shadow-indigo-500/10 cursor-pointer"
-                  id={`play-stage-btn-${level.id}`}
-                >
-                  <Play className="h-3.5 w-3.5 fill-current" />
-                  <span>冲击此关</span>
-                </button>
+                {/* Overlap Bottom 3 Performance Stars */}
+                {isUnlocked && (
+                  <div className="absolute -bottom-2.5 left-0 right-0 flex gap-0.5 justify-center z-20">
+                    {[1, 2, 3].map((starIndex) => {
+                      const isFilled = starsWon >= starIndex;
+                      return (
+                        <span 
+                          key={starIndex} 
+                          className={`text-xs select-none filter drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.8)] ${
+                            isFilled 
+                              ? 'text-yellow-400 fill-current' 
+                              : hasScore 
+                                ? 'text-amber-800' // Partially bronze dark star
+                                : 'text-amber-900/60' // Empty locked star
+                          }`}
+                        >
+                          ★
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
               </motion.div>
             );
           })}
         </motion.div>
+
+        {/* Bottom row: Big red circular back arrow button */}
+        <div className="relative z-10 flex justify-between items-end mt-10 pr-1">
+          <button
+            onClick={() => setShowGrid(false)}
+            className="w-13 h-13 rounded-full bg-gradient-to-t from-red-700 via-rose-500 to-rose-450 border-3 border-amber-950 hover:brightness-105 active:scale-90 transition-transform shadow-[0_4px_10px_rgba(0,0,0,0.45)] flex items-center justify-center text-white cursor-pointer select-none"
+            title="返回大厅"
+            id="lobby-exit-circle-btn"
+          >
+            <ArrowLeft className="h-5 w-5 stroke-[3]" />
+          </button>
+
+          <span className="text-[10px] sm:text-[11px] font-sans font-bold text-amber-950/70 select-none">
+            - 通关新挑战解锁下一关 -
+          </span>
+        </div>
+
       </div>
 
-      {/* Decorative Tips */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4 font-sans text-xs text-slate-400 text-center">
-        💡 <strong>消消乐高手密令：</strong> 单次连消 4 个相同字母会转化为行裂/列裂激光弹；连消 5 个更可产生霓虹全场核爆。消除冰缝旁的字母才能解除锁定！
-      </div>
     </div>
   );
 }

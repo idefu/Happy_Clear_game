@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ArrowLeft, RotateCcw, HelpCircle, Trophy, Sparkles, Footprints, Sparkle } from 'lucide-react';
+import { Home, RotateCcw, Volume2, VolumeX, Star } from 'lucide-react';
 import { LevelConfig, Letter } from '../types';
 
 import pic1 from '../../pic/1.png';
@@ -36,10 +36,12 @@ interface ScoreBoardProps {
     letterClearedCount: { [key in Letter]?: number };
   };
   isIceHighlighted?: boolean;
-  onOpenHelp: () => void;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
   onResetLevel: () => void;
   onBackToMenu: () => void;
   onIceGoalClick?: () => void;
+  children?: React.ReactNode; // The GameBoard is passed as children to structure layout beautifully
 }
 
 export default function ScoreBoard({
@@ -48,225 +50,330 @@ export default function ScoreBoard({
   movesRemaining,
   goalsProgress,
   isIceHighlighted,
-  onOpenHelp,
+  soundEnabled,
+  onToggleSound,
   onResetLevel,
   onBackToMenu,
-  onIceGoalClick
+  onIceGoalClick,
+  children
 }: ScoreBoardProps) {
-  // Calculate percentage of target score
+  // Score percentage representing energy filling up standard
   const scorePercent = Math.min(100, Math.floor((score / level.scoreGoal) * 100));
 
-  // Count total original ice lock tiles by looking at layout
-  const totalOriginalIce = level.layout.flat().filter(cell => cell === 2).length;
+  // Milestones for vertical scoring beaker
+  const isStar1 = score >= level.scoreGoal * 0.3;
+  const isStar2 = score >= level.scoreGoal * 0.6;
+  const isStar3 = score >= level.scoreGoal * 1.0;
 
   return (
-    <div className="w-full text-slate-100 space-y-3.5" id="score-board-wrapper">
-      {/* Top row: Title, Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex items-center gap-3">
+    <div className="w-full flex-1 flex flex-col justify-start select-none" id="forest-game-wrapper">
+      
+      {/* ──────────────────────────────────────────────────────── */}
+      {/* 1. DESKTOP PLAY VIEWPORT FRAME (MAPPED FROM USER IMAGE) */}
+      {/* ──────────────────────────────────────────────────────── */}
+      <div className="hidden md:grid md:grid-cols-[150px_1fr_60px] lg:grid-cols-[165px_1fr_64px] gap-4 lg:gap-6 items-center w-full max-w-5xl mx-auto flex-1">
+        
+        {/* COLUMN 1: LEFT WOOD HUD HUD (Stage, Goals, Moves, Thermometer Beaker) */}
+        <div className="flex flex-col items-center gap-4 py-2 self-stretch justify-between" id="wood-hud-col-left">
+          
+          {/* Hanging Ropes & Stage Name */}
+          <div className="w-full text-center relative">
+            <div className="flex justify-between w-16 mx-auto h-2.5">
+              <div className="w-0.5 bg-amber-950/80 rounded" />
+              <div className="w-0.5 bg-amber-950/80 rounded" />
+            </div>
+            <div className="bg-gradient-to-b from-amber-700 via-amber-650 to-amber-800 border-2 border-amber-900 rounded-xl px-2 py-1 shadow-md text-sm font-black text-white font-sans">
+              LV {level.id}
+            </div>
+          </div>
+
+          {/* Goals Tray (目标) */}
+          <div className="w-full bg-gradient-to-b from-amber-805 to-amber-950 border-2 border-amber-900 rounded-2xl p-2.5 shadow-lg space-y-2 relative">
+            {/* Thread connections */}
+            <div className="absolute -top-3 left-6 w-0.5 h-3 bg-amber-950" />
+            <div className="absolute -top-3 right-6 w-0.5 h-3 bg-amber-950" />
+            
+            <div className="text-[10px] font-black text-center bg-amber-950/80 text-amber-300 py-0.5 px-2 rounded-md tracking-wider">
+              目标
+            </div>
+
+            <div className="flex flex-col gap-2 items-center justify-center">
+              {/* Ice target */}
+              {level.specialGoals?.iceCount !== undefined && (
+                <div 
+                  onClick={onIceGoalClick}
+                  className={`flex items-center justify-between w-full p-1.5 rounded-lg border cursor-pointer select-none transition-all ${
+                    isIceHighlighted 
+                      ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]' 
+                      : 'bg-slate-950/60 border-slate-800'
+                  }`}
+                  id="desktop-ice-goal"
+                >
+                  <span className="text-base">❄️</span>
+                  <span className="font-mono font-black text-[11px] text-cyan-300">
+                    {Math.min(level.specialGoals.iceCount, goalsProgress.iceCleared)}/{level.specialGoals.iceCount}
+                  </span>
+                </div>
+              )}
+
+              {/* Total clearing target */}
+              {level.specialGoals?.totalEliminations !== undefined && (
+                <div className="flex items-center justify-between w-full p-1.5 rounded-lg border border-slate-800 bg-slate-950/60">
+                  <span className="text-base text-yellow-400">💥</span>
+                  <span className="font-mono font-black text-[11px] text-yellow-400">
+                    {Math.min(level.specialGoals.totalEliminations, goalsProgress.totalEliminations)}/{level.specialGoals.totalEliminations}
+                  </span>
+                </div>
+              )}
+
+              {/* Targets by direct animals/letters matching list */}
+              {level.specialGoals?.letter && Object.keys(level.specialGoals.letter).map((letKey) => {
+                const letterTyped = letKey as Letter;
+                const targetCount = level.specialGoals?.letter?.[letterTyped] || 0;
+                const currentCount = goalsProgress.letterClearedCount[letterTyped] || 0;
+                return (
+                  <div key={letKey} className="flex items-center justify-between w-full p-1.5 rounded-lg border border-slate-800 bg-slate-950/60">
+                    <img 
+                      src={imageMap[letterTyped] || pic1} 
+                      className="h-4.5 w-4.5 object-contain"
+                      alt={letterTyped}
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="font-mono font-black text-[11px] text-indigo-300">
+                      {currentCount}/{targetCount}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Moves left (步数) */}
+          <div className="w-full bg-gradient-to-b from-amber-805 to-amber-950 border-2 border-amber-900 rounded-2xl p-2 shadow-lg text-center relative">
+            <div className="absolute -top-3 left-6 w-0.5 h-3 bg-amber-950" />
+            <div className="absolute -top-3 right-6 w-0.5 h-3 bg-amber-950" />
+
+            <div className="text-[10px] font-black bg-amber-950/80 text-amber-300 py-0.5 px-2 rounded-md tracking-wider">
+              步数
+            </div>
+            
+            <div className="mt-2 flex justify-center">
+              <div className={`relative h-15 w-15 rounded-full flex items-center justify-center border-2 shadow-inner transition-all ${
+                movesRemaining <= 5 
+                  ? 'bg-rose-950/60 border-rose-600 animate-pulse' 
+                  : 'bg-amber-900/40 border-amber-700'
+              }`}>
+                <span className={`font-mono text-2xl font-black ${
+                  movesRemaining <= 5 ? 'text-rose-400' : 'text-amber-400'
+                }`}>
+                  {movesRemaining}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Vertical Thermometer score bulb (From illustration) */}
+          <div className="flex flex-col items-center w-full gap-1 mt-1">
+            <div className="relative w-7 h-24 bg-slate-950/80 border-2 border-slate-700/80 rounded-full flex flex-col justify-end p-0.5 overflow-hidden shadow-inner">
+              {/* Colored flowing water bar */}
+              <div 
+                className="bg-gradient-to-t from-cyan-600 via-cyan-400 to-emerald-400 w-full rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(6,182,212,0.7)]" 
+                style={{ height: `${scorePercent}%` }}
+              />
+
+              {/* Pin Stars on side of beakers */}
+              <div className="absolute inset-y-0 right-[-10px] flex flex-col justify-between py-1 pointer-events-none">
+                <Star className={`h-3 w-3 ${isStar3 ? 'text-yellow-400 fill-current' : 'text-slate-600'}`} style={{ transform: 'translateY(0%)' }} />
+                <Star className={`h-3 w-3 ${isStar2 ? 'text-yellow-400 fill-current' : 'text-slate-600'}`} style={{ transform: 'translateY(-20%)' }} />
+                <Star className={`h-3 w-3 ${isStar1 ? 'text-yellow-400 fill-current' : 'text-slate-600'}`} style={{ transform: 'translateY(-50%)' }} />
+              </div>
+            </div>
+
+            {/* Glowing Flask Bulb bottom center holding actual numerical points score */}
+            <div className="w-14 h-14 rounded-full bg-slate-900 border-2 border-slate-700 flex flex-col items-center justify-center shadow-lg -mt-2 z-10 select-none">
+              <span className="font-mono text-white font-black text-[11px] leading-none">
+                {score}
+              </span>
+              <span className="text-[10px] font-bold text-slate-450 tracking-wider">
+                得分
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* COLUMN 2: THE MAIN GRAPHICS AREA (GameBoard) */}
+        <div className="flex flex-col items-center justify-center p-1 w-full h-full max-w-[580px]">
+          {children}
+        </div>
+
+        {/* COLUMN 3: RIGHT PANEL CONTROLS (Floating circular wood discs buttons) */}
+        <div className="flex flex-col gap-3 py-4 items-center self-stretch justify-center shrink-0 w-12" id="wood-buttons-col-right">
+          {/* Switch Stage List Selector button */}
           <button
             onClick={onBackToMenu}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/80 border border-slate-700/60 hover:bg-slate-700 hover:text-white transition-all text-slate-300 shadow-md"
-            title="返回关卡选择"
-            id="back-to-menu-btn"
+            className="flex h-10 w-10 shrink-0 transform items-center justify-center rounded-full bg-gradient-to-b from-amber-700 to-amber-900 text-amber-100 hover:text-white border-2 border-amber-950 shadow-md transition-all hover:scale-105 active:scale-90 cursor-pointer"
+            id="control-btn-home"
+            title="Stage selector"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <Home className="h-4.5 w-4.5" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-md bg-indigo-600 px-2 py-0.5 text-xs font-black font-mono">
-                LV.{level.id}
-              </span>
-              <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-300 bg-clip-text text-transparent">
-                {level.chineseName}
-              </h1>
-            </div>
-            <p className="text-xs text-slate-400 font-medium font-sans">
-              {level.name}
-            </p>
-          </div>
-        </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2 self-end sm:self-auto">
-          <button
-            onClick={onOpenHelp}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all text-slate-300 shadow-sm"
-            id="btn-trigger-help"
-          >
-            <HelpCircle className="h-4 w-4 text-indigo-400" />
-            <span>玩法玩法</span>
-          </button>
+          {/* Reset level reload button */}
           <button
             onClick={onResetLevel}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition-all text-slate-300 shadow-sm"
-            id="btn-trigger-reset"
+            className="flex h-10 w-10 shrink-0 transform items-center justify-center rounded-full bg-gradient-to-b from-amber-700 to-amber-900 text-amber-100 hover:text-white border-2 border-amber-950 shadow-md transition-all hover:scale-105 active:scale-90 cursor-pointer"
+            id="control-btn-reset"
+            title="Reset stage"
           >
-            <RotateCcw className="h-4 w-4 text-emerald-400" />
-            <span>重置关卡</span>
+            <RotateCcw className="h-4.5 w-4.5 text-amber-400" />
+          </button>
+
+          {/* Volume toggle mute/unmute action button */}
+          <button
+            onClick={onToggleSound}
+            className="flex h-10 w-10 shrink-0 transform items-center justify-center rounded-full bg-slate-900 text-slate-300 border-2 border-slate-850 shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            id="control-btn-sound"
+          >
+            {soundEnabled ? (
+              <Volume2 className="h-4.5 w-4.5 text-emerald-400" />
+            ) : (
+              <VolumeX className="h-4.5 w-4.5 text-slate-500" />
+            )}
           </button>
         </div>
+
       </div>
 
-      {/* Main Stats Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-        {/* Score & Goal Tracker */}
-        <div className="md:col-span-4 rounded-2xl bg-slate-900/90 border border-slate-800 p-4 flex flex-col justify-between shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+      {/* ──────────────────────────────────────────────────────── */}
+      {/* 2. MOBILE PLAY VIEWPORT FRAME (ULTRA CONCISE HUD HEADER) */}
+      {/* ──────────────────────────────────────────────────────── */}
+      <div className="block md:hidden w-full flex flex-col justify-start" id="mobile-play-frame-container">
+        {/* Ultra-narrow header bar styled with wood look */}
+        <div className="w-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-xl px-1.5 py-1.5 flex items-center justify-between gap-1.5 text-xs font-mono select-none" id="mobile-top-hud">
           
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
-              <Trophy className="h-3.5 w-3.5 text-yellow-500" /> 累计积分 (Target Progress)
-            </span>
-            <span className="font-mono text-xs font-black text-indigo-300">
-              {score}/{level.scoreGoal}
-            </span>
-          </div>
-          
-          <div className="text-3xl font-black font-mono text-white tracking-tight py-1">
-            {score.toLocaleString()}
-          </div>
+          {/* Stage name */}
+          <span className="rounded bg-indigo-650 px-1.5 py-0.5 text-[10px] text-white font-black shrink-0">
+            LV {level.id}
+          </span>
 
-          <div className="mt-2.5">
-            <div className="flex justify-between text-[11px] text-slate-400 font-mono mb-1">
-              <span>关卡目标: {level.scoreGoal} 积分</span>
-              <span>{scorePercent}%</span>
-            </div>
-            <div className="h-2.5 w-full bg-slate-850 rounded-full overflow-hidden border border-slate-800 p-[1px]">
-              <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300 ease-out shadow-[0_0_8px_rgba(99,102,241,0.5)]"
-                style={{ width: `${scorePercent}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Moves Left */}
-        <div className="md:col-span-3 rounded-2xl bg-slate-900/90 border border-slate-800 p-4 flex flex-col justify-between shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
-              <Footprints className="h-4 w-4 text-pink-400" /> 剩余步数 (Moves Left)
-            </span>
-          </div>
-
-          <div className="py-1 flex items-baseline gap-1.5">
-            <span className={`text-4xl font-extrabold font-mono tracking-tight leading-none ${
-              movesRemaining <= 5 ? 'text-rose-500 animate-pulse font-black' : 'text-pink-400'
-            }`}>
-              {movesRemaining}
-            </span>
-            <span className="text-xs text-slate-400 font-semibold font-sans">步</span>
-          </div>
-
-          <div className="text-[11px] text-slate-400 flex items-center gap-1 font-sans">
-            {movesRemaining <= 5 ? (
-              <span className="text-rose-400 font-bold">⚠️ 步数告急！请专注于匹配最大消除</span>
-            ) : (
-              <span>合理规划每一步以达成爆破</span>
-            )}
-          </div>
-        </div>
-
-        {/* Level Specific Goals */}
-        <div className="md:col-span-5 rounded-2xl bg-slate-900/90 border border-slate-800 p-4 flex flex-col justify-between shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="flex items-center justify-between mb-2 pb-1 border-b border-slate-800">
-            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-cyan-400" /> 通关特别条件 (Special Goals)
-            </span>
-            <span className="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded-md font-sans">
-              未完成此目标仍算未连通
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-xs py-1">
-            {/* Ice goal */}
+          {/* Target clear indicator list */}
+          <div className="flex-1 flex gap-1 items-center justify-center min-w-0">
+            {/* Ice list item */}
             {level.specialGoals?.iceCount !== undefined && (
-              <button 
+              <div 
                 onClick={onIceGoalClick}
-                type="button"
-                title="点击在棋盘中闪烁定位尚未碎冰的位置！(Click to highlight remaining ice)"
-                className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl transition-all duration-300 w-full text-left group/ice cursor-pointer select-none hover:scale-[1.03] active:scale-95 ${
-                  isIceHighlighted
-                    ? 'bg-cyan-950/90 border-cyan-400 ring-2 ring-cyan-400 ring-offset-1 ring-offset-slate-950 shadow-[0_0_25px_rgba(34,211,238,0.9)] scale-110 z-10 animate-pulse'
-                    : 'bg-slate-850/60 border-blue-500/10 hover:bg-cyan-500/20 hover:border-cyan-400/50'
-                } border`}
+                className={`flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded leading-none font-bold transition-all shrink-0 cursor-pointer ${
+                  isIceHighlighted 
+                    ? 'bg-cyan-500 text-slate-950' 
+                    : 'bg-cyan-950/30 text-cyan-400 border border-cyan-900/30'
+                }`}
               >
-                <span className={`text-slate-300 flex flex-col font-semibold transition-colors duration-200 group-hover/ice:text-cyan-200 text-left ${isIceHighlighted ? 'text-cyan-200' : ''}`}>
-                  <span className="flex items-center gap-1">❄️ 碎冰层:</span>
-                  <span className="text-[9px] text-slate-400 group-hover/ice:text-cyan-300/80 font-normal mt-0.5 leading-none font-sans select-none">点击定位未破冰</span>
-                </span>
-                <span className={`font-mono font-bold px-1.5 py-1 rounded transition-all duration-300 group-hover/ice:scale-105 ${isIceHighlighted ? 'text-slate-950 bg-cyan-300 shadow-md font-extrabold scale-110' : 'text-cyan-300 bg-blue-500/10'}`}>
+                <span>❄️</span>
+                <span>
                   {Math.min(level.specialGoals.iceCount, goalsProgress.iceCleared)}/{level.specialGoals.iceCount}
                 </span>
-              </button>
+              </div>
             )}
 
-            {/* Total Eliminations goal */}
+            {/* Total Cleared list item */}
             {level.specialGoals?.totalEliminations !== undefined && (
-              <div className="flex items-center justify-between bg-slate-850/60 px-2.5 py-1.5 rounded-xl border border-yellow-500/10 hover:bg-slate-800 transition-all">
-                <span className="text-slate-300 flex items-center gap-1">💥 累计消除 (Clear):</span>
-                <span className="font-mono font-bold text-yellow-300 bg-yellow-500/10 px-1.5 py-0.5 rounded">
+              <div className="flex items-center gap-0.5 text-[10px] text-yellow-400 px-1 py-0.5 rounded bg-yellow-950/30 border border-yellow-900/30 font-bold shrink-0 leading-none">
+                <span>💥</span>
+                <span>
                   {Math.min(level.specialGoals.totalEliminations, goalsProgress.totalEliminations)}/{level.specialGoals.totalEliminations}
                 </span>
               </div>
             )}
 
-            {/* Max Combo achieved goal */}
-            {level.specialGoals?.maxCombo !== undefined && (
-              <div className="flex items-center justify-between bg-slate-850/60 px-2.5 py-1.5 rounded-xl border border-pink-500/10 hover:bg-slate-800 transition-all">
-                <span className="text-slate-300 flex items-center gap-1">⚡️ 最高连消 (Combo):</span>
-                <span className="font-mono font-bold text-pink-300 bg-pink-500/10 px-1.5 py-0.5 rounded">
-                  {goalsProgress.maxComboAchieved}/{level.specialGoals.maxCombo}
-                </span>
-              </div>
-            )}
-
-            {/* General designated letters count goal */}
+            {/* Direct matches targets inline list */}
             {level.specialGoals?.letter && Object.keys(level.specialGoals.letter).map((letKey) => {
               const letterTyped = letKey as Letter;
               const targetCount = level.specialGoals?.letter?.[letterTyped] || 0;
-              const currentCleans = goalsProgress.letterClearedCount[letterTyped] || 0;
-              const isCellDone = currentCleans >= targetCount;
-
+              const currentCount = goalsProgress.letterClearedCount[letterTyped] || 0;
               return (
-                <div
-                  key={letKey}
-                  className={`flex items-center justify-between px-2.5 py-1.5 rounded-xl border transition-all ${
-                    isCellDone
-                      ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                      : 'bg-slate-850/60 border-indigo-500/10 text-slate-350'
-                  }`}
+                <div 
+                  key={letKey} 
+                  className="flex items-center gap-0.5 text-[10px] text-indigo-300 px-1 py-0.5 rounded bg-indigo-950/20 font-bold shrink-0 leading-none"
                 >
-                  <span className="flex items-center gap-1.5 font-medium font-sans">
-                    <img 
-                      src={imageMap[letterTyped] || pic1} 
-                      className="h-5.5 w-5.5 object-contain inline-block drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
-                      alt={letterTyped}
-                      referrerPolicy="no-referrer"
-                    />
-                    <span>匹配数:</span>
-                  </span>
-                  <span className="font-mono font-bold">
-                    {currentCleans}/{targetCount}
+                  <img 
+                    src={imageMap[letterTyped] || pic1} 
+                    className="h-3 w-3 object-contain"
+                    alt={letterTyped}
+                    referrerPolicy="no-referrer"
+                  />
+                  <span>
+                    {currentCount}/{targetCount}
                   </span>
                 </div>
               );
             })}
-
-            {/* Default condition if no special goals, like clear warm grid score */}
-            {!level.specialGoals && (
-              <div className="col-span-2 flex items-center gap-2 bg-indigo-950/10 w-full rounded-xl text-slate-400 italic text-[11px] p-2 border border-slate-805">
-                <Sparkle className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-                实现目标积分即可通关，非常基础的教学指引。
-              </div>
-            )}
           </div>
+
+          {/* Moves remaining limit indicator badge */}
+          <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-950/60 rounded border border-slate-800 shrink-0 font-bold">
+            <span className="text-[9px] text-slate-500 uppercase tracking-tighter">步数:</span>
+            <span className={`text-[11px] leading-none ${movesRemaining <= 4 ? 'text-rose-500 animate-pulse font-black' : 'text-amber-400'}`}>
+              {movesRemaining}
+            </span>
+          </div>
+
+          {/* Circle Mini Controls buttons list for home, reload, sound */}
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Audio volume toggler info */}
+            <button
+              onClick={onToggleSound}
+              className="flex h-5.5 w-5.5 items-center justify-center rounded-md bg-slate-850 hover:bg-slate-800 text-slate-400 transition-all cursor-pointer active:scale-95"
+              id="mobile-sound-btn"
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-3 w-3 text-emerald-400" />
+              ) : (
+                <VolumeX className="h-3 w-3 text-slate-500" />
+              )}
+            </button>
+
+            {/* Level reload action */}
+            <button
+              onClick={onResetLevel}
+              className="flex h-5.5 w-5.5 items-center justify-center rounded-md bg-slate-850 hover:bg-slate-800 text-slate-400 transition-all cursor-pointer active:scale-95"
+              id="mobile-reset-btn"
+            >
+              <RotateCcw className="h-3 w-3 text-amber-500" />
+            </button>
+
+            {/* Stage Selector Exit click */}
+            <button
+              onClick={onBackToMenu}
+              className="flex h-5.5 w-5.5 items-center justify-center rounded-md bg-slate-850 hover:bg-slate-800 text-slate-400 transition-all cursor-pointer active:scale-90"
+              id="mobile-home-btn"
+            >
+              <Home className="h-3 w-3 text-indigo-400" />
+            </button>
+          </div>
+
         </div>
+
+        {/* Small horizontal score bar energy line with stars indicators */}
+        <div className="w-full mt-1.5 mb-1.5 px-1 relative flex items-center gap-1.5 bg-slate-950/40 p-1 rounded-md border border-slate-900" id="mobile-score-meter-progress">
+          <div className="flex-1 h-1.5 bg-slate-900 rounded-full overflow-hidden relative">
+            <div 
+              className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full transition-all duration-300" 
+              style={{ width: `${scorePercent}%` }}
+            />
+          </div>
+          <span className="font-mono text-[9px] text-zinc-400 font-bold shrink-0">
+            {score}/{level.scoreGoal}
+          </span>
+        </div>
+
+        {/* Main Board display rendered under top HUD */}
+        <div className="w-full flex items-center justify-center">
+          {children}
+        </div>
+
       </div>
+
     </div>
   );
 }
