@@ -1,20 +1,211 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 🎮 快乐消消乐 Launcher (Happy Match-3 Game)
 
-# Run and deploy your AI Studio app
+[![React Version](https://img.shields.io/badge/react-19.x-blue.svg)](https://react.dev)
+[![Vite Version](https://img.shields.io/badge/vite-6.x-purple.svg)](https://vite.dev)
+[![Tailwind CSS](https://img.shields.io/badge/tailwind-4.x-38bdf8.svg)](https://tailwindcss.com)
+[![TypeScript](https://img.shields.io/badge/typescript-5.x-blue.svg)](https://www.typescriptlang.org)
 
-This contains everything you need to run your app locally.
+**快乐消消乐 Launcher** 是一款基于前端现代化技术栈（React 19 + TypeScript + Vite 6 + Tailwind CSS 4 + Motion）开发的高品质、极简、高帧率的三消益智游戏（Match-3）。游戏以丰富的动画效果、连锁爆炸反应、关卡机制以及音效为核心，提供了沉浸式的爆爽消除体验。
 
-View your app in AI Studio: https://ai.studio/apps/73c2307b-ef00-40eb-90ea-6410cbfefa21
+---
 
-## Run Locally
+## 📖 目录
+- [🌟 项目介绍](#-项目介绍)
+- [🛠️ 技术栈](#️-技术栈)
+- [📂 项目结构](#-项目结构)
+- [✨ 核心功能](#-核心功能)
+- [💡 功能实现原理](#-功能实现原理)
+- [📋 环境依赖](#-环境依赖)
+- [🚀 安装与运行](#-安装与运行)
+- [🎮 使用说明与核心玩法](#-使用说明与核心玩法)
+- [❓ 常见问题 (FAQ)](#-常见问题-faq)
+- [📄 开源协议](#-开源协议)
+- [🌐 参考文档与链接](#-参考文档与链接)
 
-**Prerequisites:**  Node.js
+---
 
+## 🌟 项目介绍
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+**快乐消消乐 Launcher** 的核心设计理念是**“极简、爆爽、极速反应”**。我们在传统三消游戏的基础之上，引入了一套极富策略性的炸弹与特殊道具合成机制，搭配炫酷的粒子发射器动画（Canvas Particle）和流畅的动效过渡，旨在为玩家提供卓越的触觉与视觉反馈。
+
+本游戏不仅适合作为消遣的小游戏，也是学习 React 19 新特性、复杂网格状态更新、矩阵重力填充算法、二维碰撞检测以及自定义 Canvas 渲染的绝佳开源项目范例。
+
+---
+
+## 🛠️ 技术栈
+
+本项目采用了完全符合现代企业级标准的纯前端架构：
+
+| 技术/框架 | 版本 | 描述 |
+| :--- | :--- | :--- |
+| **React** | `^19.0.1` | 用于核心用户界面构建，利用 Hook 驱动游戏局内状态与响应。 |
+| **Vite** | `^6.2.3` | 提供极速的下一代前端开发与打包构建工具。 |
+| **Tailwind CSS** | `^4.1.14` | 全新 v4.0 版本，通过现代 CSS 实现在极低代码积压下的像素级精致布局。 |
+| **Motion** | `^12.23.24` | 驱动精美的卡片转场、弹窗入场与丝滑的用户交互反馈。 |
+| **TypeScript** | `~5.8.2` | 提供全方位的型别防御、重构安全与智能的代码提示。 |
+| **Lucide React** | `^0.546.0` | 提供简洁统一的图标包支持。 |
+
+---
+
+## 📂 项目结构
+
+```bash
+├── .env.example              # 环境变量配置模板
+├── .gitignore                # Git 忽略文件目录
+├── index.html                # Vite 静态页面主入口
+├── metadata.json             # AI Studio 平台应用声明文件
+├── package.json              # 项目依赖项及底层构建指令
+├── tsconfig.json             # TypeScript 配置规则
+├── vite.config.ts            # Vite 构建及其插件配置
+│
+├── pic/                      # 静态图片资源目录 (游戏消除用到的图案 0-6.png)
+│   ├── 0.png                 # 特殊黑洞消除器 (HYPER_EXPLODER) 对应图标
+│   ├── 1.png                 # 黄色爱心棋子
+│   ├── 2.png                 # 蓝色钻石棋子
+│   ├── 3.png                 # 红色苹果棋子
+│   ├── 4.png                 # 绿色星星棋子
+│   ├── 5.png                 # 紫色水滴棋子
+│   └── 6.png                 # 橙色圆环棋子
+│
+└── src/                      # 主要源代码开发目录
+    ├── App.tsx               # 游戏主要页面路由与多关卡全局状态管理
+    ├── main.tsx              # 应用渲染挂载入口
+    ├── index.css             # 全局样式文件（引入并集成 Tailwind v4）
+    ├── types.ts              # 游戏数据模型、关卡接口与效果类型定义
+    │
+    ├── components/           # 独立UI组件代码库
+    │   ├── GameBoard.tsx     # 消除网格核心画布、拖拽、Canvas粒子、重力更新与交互
+    │   └── ScoreBoard.tsx    # 游戏信息看板：显示分数、倒计步数、关卡目标与动态提示
+    │
+    ├── data/
+    │   └── levels.ts         # 精妙设计的关卡配置文件（包含第18关等高级配方）
+    │
+    └── utils/
+        ├── gameLogic.ts      # 棋盘矩阵初始化、特殊连消逻辑、重力滑落填充、寻找可用移动算法
+        └── sound.ts          # 音效播放控制类 (SoundManager)，原生调用 AudioContext 缓冲及兼容
+```
+
+---
+
+## ✨ 核心功能
+
+1. **多元化特殊道具合成**：
+   * 🏆 **平行两列/两行三消升级【BOMB 炸弹】**：若当次消除中同时出现了两个平行的 `[xxx]` 消除项，在对应位置将自动合成生成一张带有爆炸特效的炸弹卡片。
+   * 🌟 **垂直相交三消升级【0.png 黑洞】**：若当次消除成功促成了至少两列/两行垂直相交相碰的 `[xxx]` 图案（如 T 字、L 字或十字型），则会在交点位置自动生成一颗威力巨大的 **0.png (HYPER_EXPLODER)** 特殊棋子。
+   * ⚡ **单行/单列四消升级**：生成对应的 `ROW_BLASTER` (行光束爆接) / `COL_BLASTER` (列光束爆接)。
+2. **三维冰层消除与定位**：
+   * 关卡包含带「双层/单层碎冰」的冰原地块。
+   * **冰层定位仪 (Ripple Radar)**：玩家可在局内直接点击右侧看板的 ❄️ **碎冰层** 目标按钮，游戏棋盘内**残存未消除的冰层**会以高亮闪烁、雷达涟漪波纹（Ripple Beacon）和 105% 卡片轻微颤动等表现极速显现，方便快速通关。
+3. **完美模拟物理重力**：
+   * 消除完成后，上方棋子在重力驱动下按列自由滑落，并在上方自动补充全新生成的彩色棋子。
+   * 具有递归的「连消（Combo）」链式触发评估，每多一次连消就会解锁更高的分数倍率与爽快的连续炸裂粒子。
+4. **轻量、强韧的原生 Canvas 粒子反馈**：
+   * 游戏不依赖臃肿的 WebGL/PixiJS 库，纯手写高效 Canvas Overlay 粒子喷发引擎。
+   * 针对「BOMB (红色/橙色超快发散)」、「0.png (七彩霓虹彩虹漩涡)」与「普通消除 (匹配色飞散)」定制了独有的质量分摊、阻力与色彩衰减，维持 60 FPS 的流畅表现。
+
+---
+
+## 💡 功能实现原理
+
+### 1. 关卡重力矩阵
+在 `src/utils/gameLogic.ts` 中维护一个二维数组 `GridCell[][]`。核心算法依靠以下三步管线：
+* **第一步：`scanMatches`**：按行、按列扫描匹配。检测连续相同值 $\ge 3$ 的项。
+* **第二步：`processMatchesAndGenerateSpecials`**：评估是否有高阶匹配。在消解格子的同时，通过上述十字/平行匹配规则，升级某一点为 `BOMB`、`ROW_BLASTER`、`COL_BLASTER` 或 `HYPER_EXPLODER`（0.png）。
+* **第三步：`applyGravityAndSpawn`**：
+  * 每列采用双指针探照：从底部开始往上填补，遇到空位则将上方的有效格下移，顶部缺口采用关卡设定的允许元素范围（`allowedLetters`）进行随机充能并平滑划入。
+
+### 2. 精确地块高亮
+为了实现最直观的碎冰定位：
+* `ScoreBoard` 在用户点击未完成目标时向 `App.tsx` 抛出 `onIceGoalClick` 信号。
+* `App` 全局开启 `isIceHighlighted` 二阶段倒计时布尔开关（1.5秒 ~ 2.2秒）。
+* `GameBoard` 读取该布尔信号，在所有处于 `cell.isLocked = true` 的 DOM 节点上动态添加 `animate-ping` 与带有 `shadow-[0_0_25px_rgba(34,211,238,1.0)]` 的浅色磨砂冰晶玻璃光效，并产生微振动扩大，极大降低了由于视疲劳而无法看清残余微弱冰层的用户困扰。
+
+---
+
+## 📋 环境依赖
+
+开发、测试与生产构建所需环境如下：
+- **Node.js**: `v18.x` 或 `v20.x` 及以上版本
+- **npm**: `v9.x` 及以上包管理系统
+
+---
+
+## 🚀 安装与运行
+
+完成以下步骤，即可在本地和服务器极速运行本游戏：
+
+### 1. 克隆或解包项目
+保证当前处于项目的根目录下（包含 `package.json` 的文件夹）。
+
+### 2. 安装全部依赖包
+运行 npm 安装指令以下载 React 19、Tailwind CSS v4 等资源：
+```bash
+npm install
+```
+
+### 3. 本地启动开发服务器
+```bash
+npm run dev
+```
+启动成功后，将会在控制台输出：
+```text
+  vite v6.2.3  ready in 250 ms
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://192.168.x.x:3000/
+```
+打开浏览器访问 [http://localhost:3000/](http://localhost:3000/) 即可马上体验！
+
+### 4. 生产构建打包
+当开发阶段结束后，运行如下指令执行静态混淆与优化打包：
+```bash
+npm run build
+```
+编译产物会无损生成于 `/dist` 文件夹内。你可以直接将 `/dist` 下的内容分发或托管在任何主流静态托管平台上（如 Github Pages, Cloud Run, Vercel 等）。
+
+---
+
+## 🎮 使用说明与核心玩法
+
+### 🧠 基本规则
+- 🎯 **消除机制**：鼠标点击或手指触碰一个棋子，并将其向**上下左右**相邻的格子拖动。如果两颗棋子交换后能让同一条直线上（横或竖）拼凑出 **3 个或更多相同款式**的棋子，即可完成交换并消除！
+- 💥 **特殊奖励机制**：
+  - **行/列消除光波**：进行 4 棋子连消后生成。下一次消除它时会激活激光，横向/纵向扫清整条线。
+  - **BOMB 炸弹**：触发平行消除（如 $1 \times 3$ 的水平两列并消）时自动获取。引爆时产生半径为 2 格的巨型范围爆炸！
+  - **0.png 黑洞（HYPER_EXPLODER）**：由不规则的多向交叉五消或十字垂直相夹组合形成。触发时发生全屏连环星璇风暴，自动在几秒内炸毁并消除所有的随机特殊方块并为全屏充能。
+- 🧊 **关卡目标**：每一关有专门的目标：
+  1. **积分（Score）**：在规定的步数（Moves）内打破历史高分。
+  2. **除冰层（Ice Layer）**：棋盘下面有些位置凝结着寒霜，必须在带有冰霜的格子上成功进行消除引发碎冰层瓦解。
+
+---
+
+## ❓ 常见问题 (FAQ)
+
+#### 🔥 Q1: 第一关与第18关经常卡冰过不去？
+* **A**: 关卡 18 等进阶配方中有 10/10 及更多的冰层，冰层散落比较细密。如果你找不到未碎除的冰：
+  * **直接点击右上角【碎冰层: X/Y】的目标按钮**！全盘未消除的冰格子将会持续闪烁两秒高亮，瞬间完成动态定位。
+  * 本项目已在先前针对第18关进行了代码防御修正（彻底修复了之前因为特定配置差异导致已经全部消去冰层却无法识别过关的底层同步缺陷）。
+
+#### 🚀 Q2: 游戏运行卡顿，或者是动画帧率不平稳？
+* **A**: 请确保你的浏览器由于开启了省电模式或多标签挂起而没有对页面进行 CPU 调幅限制。本游戏采用单层高效 Canvas Overlay 重绘粒子机制，日常渲染能轻易拉满 60-120 FPS 的显示上限。如果是老旧设备，可以通过合理加快操作，利用连续消除的快感直接引爆游戏。
+
+#### 🎵 Q3: 为什么游戏启动没有声音？
+* **A**: 根据目前各大浏览器的最新的音频安全限制，浏览器在「没有任何用户手动点击或任何触控行为」前是严禁静默强制播放任何音频的。你只需要点击任何棋子或音响控制按钮，声卡通道随即被激活并为您带来爽快的清脆碰撞模拟。
+
+---
+
+## 📄 开源协议
+
+本项目使用 **MIT 许可证** (MIT License)。
+
+这意味着您可以完全自由地使用、修改、再发布本项目源码，用于个人娱乐甚至是商业二创和二次发布。但请保持原项目的版权声明并在您发布的源码中附加相同的 MIT 协议书。
+
+---
+
+## 🌐 参考文档与链接
+
+为了便于对该项目进行进阶二次开发与效果改版，可以深度参考如下网址：
+- ⚛️ [React 19 官方新特性文档](https://react.dev/blog/2024/12/05/react-19)
+- 🚀 [Vite 6 构建参数及优化手册](https://vite.dev/config/)
+- 🎨 [Tailwind CSS v4 系统新变化与主题重构](https://tailwindcss.com/docs/v4-beta)
+- 🌀 [Motion (Framer Motion) 物理动画动画库手册](https://motion.dev/)
+- 📦 [Lucide 一套精美的轻量 SVG icon](https://lucide.dev/)
