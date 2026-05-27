@@ -633,10 +633,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Footer copyright */}
-      <footer className="py-4 border-t border-slate-900 bg-slate-950/30 text-center text-[11px] text-slate-500 font-mono mt-auto select-none">
-        Alphabet Match-3 Puzzle Game Client Board - Compiled with React 19 & Tailwind 4
-      </footer>
     </div>
   );
 }

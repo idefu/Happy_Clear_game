@@ -13,42 +13,36 @@ export const LEVELS: LevelConfig[] = [
     description: "Beginner level. Swap adjacent letters to match 3 of the same letters in a line. Simple and sweet!",
     chineseDescription: "新手热身关卡。通过上下左右滑动交换相邻字母，拼出3个或3个以上连击。简单而有趣！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 2000,
-    movesLimit: 25,
+    scoreGoal: 1000,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.10 // 10% tiles randomly turn out with special effect on spawn to help players!
+    initialSpecialProbability: 0.12
   },
   {
     id: 2,
     name: "The Grand Cross",
     chineseName: "十字圣殿",
     description: "A cross-shaped arena. Irregular corners limit matching. Watch your steps!",
-    chineseDescription: "经典的十字形棋盘。四个角落被锁死阻隔，使得匹配空间受限，滑动需要更谨慎！",
+    chineseDescription: "经典的十字形棋盘。角落被空地阻隔，使匹配空间集中，滑动需要更富有技巧性！",
     layout: [
-      [0, 0, 1, 1, 1, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 0, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 0, 1, 1, 1, 1, 0, 0],
-      [0, 0, 1, 1, 1, 1, 0, 0]
+      [0, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 0]
     ],
-    scoreGoal: 3500,
-    movesLimit: 26,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.12,
+    scoreGoal: 1600,
+    movesLimit: 20,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.14,
     specialGoals: {
-      letter: { 'A': 15, 'B': 15 } // Match specified amount of letters
+      letter: { 'A': 8, 'B': 8 }
     }
   },
   {
@@ -56,24 +50,21 @@ export const LEVELS: LevelConfig[] = [
     name: "Frosty Fortress",
     chineseName: "冰封禁地",
     description: "Ice barriers block the lower board. Match adjacent to shatter the ice locks!",
-    chineseDescription: "冰霜封锁住了下面一两排的字母，它们无法发生位移。在它们旁边进行消除来击碎冰层吧！",
+    chineseDescription: "冰霜封锁住了中央的关键。在冰霜格子旁边进行消除去除坚硬碎冰吧！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 2, 2, 2, 2, 1, 1], // grid containing '2' means spawned with Locked Ice layer
-      [1, 1, 2, 2, 2, 2, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 2, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 5000,
-    movesLimit: 24,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.14,
+    scoreGoal: 2200,
+    movesLimit: 20,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.15,
     specialGoals: {
-      iceCount: 8,
-      totalEliminations: 45
+      iceCount: 6,
+      totalEliminations: 28
     }
   },
   {
@@ -81,23 +72,20 @@ export const LEVELS: LevelConfig[] = [
     name: "Twin Pillars",
     chineseName: "双塔圣殿",
     description: "Two narrow vertical towers separated by a central gap. Gravity feeds separately!",
-    chineseDescription: "两个完全孤立的立柱，中间有一道无底深渊隔开，重力落下分成两股。多依靠横向特殊道具产生跨空连击！",
+    chineseDescription: "两个完全孤立的立柱，中间有一道无底深渊隔开。多多利用合成激光来穿透长廊连击吧！",
     layout: [
-      [1, 1, 1, 0, 0, 1, 1, 1],
-      [1, 1, 1, 0, 0, 1, 1, 1],
-      [1, 1, 1, 0, 0, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 0, 0, 1, 1, 1],
-      [1, 1, 1, 0, 0, 1, 1, 1],
-      [1, 1, 1, 0, 0, 1, 1, 1]
+      [1, 1, 0, 1, 1],
+      [1, 1, 0, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 0, 1, 1],
+      [1, 1, 0, 1, 1]
     ],
-    scoreGoal: 7000,
-    movesLimit: 28,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.15,
+    scoreGoal: 2605,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.16,
     specialGoals: {
-      totalEliminations: 55,
+      totalEliminations: 30,
       maxCombo: 2
     }
   },
@@ -106,24 +94,21 @@ export const LEVELS: LevelConfig[] = [
     name: "Diamond Vault",
     chineseName: "钻石宝库",
     description: "A diamond shape grid. Extreme matching restrictions. Use your special power letters wisely!",
-    chineseDescription: "由核心向两侧扩散的菱形棋盘。极端限制的边缘导致匹配几率变低，需要善加利用特殊的连击奖励！",
+    chineseDescription: "精致的菱形古塔棋盘，由于周围边缘被遮盖，极其考验滑动手感与策略选择！",
     layout: [
-      [0, 0, 0, 1, 1, 0, 0, 0],
-      [0, 0, 1, 1, 1, 1, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1, 0],
-      [0, 0, 1, 1, 1, 1, 0, 0],
-      [0, 0, 0, 1, 1, 0, 0, 0]
+      [0, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 0]
     ],
-    scoreGoal: 9000,
-    movesLimit: 25,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.16,
+    scoreGoal: 3200,
+    movesLimit: 20,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.18,
     specialGoals: {
-      totalEliminations: 65,
-      maxCombo: 3
+      totalEliminations: 32,
+      maxCombo: 2
     }
   },
   {
@@ -131,25 +116,22 @@ export const LEVELS: LevelConfig[] = [
     name: "Supernova Glid",
     chineseName: "超新星核心",
     description: "Giant irregular board. Ice blocks and stones everywhere. Triggers incredible high-combo chain reactions!",
-    chineseDescription: "超大不规则异型棋盘，充满冰霜封锁区域，拥有极强的双料特殊连锁判定。挑战分数极限！",
+    chineseDescription: "多裂缝不规则棋盘，布满随机散落的核能冰墙。利用强大的连消产生高空物料崩塌！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 2, 1, 1, 2, 1], // Ice blockers scattered
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 0, 0, 1, 0, 0, 1, 1], // Gaps
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 2, 1, 1, 2, 1], // Scattered ice
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 0]
+      [1, 1, 1, 1, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 0, 0, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 12000,
-    movesLimit: 32,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 4200,
+    movesLimit: 24,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.20,
     specialGoals: {
-      iceCount: 6,
-      totalEliminations: 80,
+      iceCount: 4,
+      totalEliminations: 36,
       maxCombo: 3
     }
   },
@@ -158,24 +140,21 @@ export const LEVELS: LevelConfig[] = [
     name: "Sparking Trails",
     chineseName: "火花轨迹",
     description: "Symmetrical icy columns frame the board. Clear the glaciers to release maximum space!",
-    chineseDescription: "冰封轨道在棋盘两侧形成天然阻碍。集中火力生成特殊字母，轰碎两旁的极寒坚冰！",
+    chineseDescription: "对称型冰河轨道。两个外立柱覆盖着重冰封印，想方设法轰开障碍扩大战场！",
     layout: [
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2]
+      [2, 1, 1, 1, 2],
+      [2, 1, 1, 1, 2],
+      [2, 1, 1, 1, 2],
+      [2, 1, 1, 1, 2],
+      [2, 1, 1, 1, 2]
     ],
-    scoreGoal: 15000,
-    movesLimit: 28,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 4800,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.18,
     specialGoals: {
-      iceCount: 16,
-      totalEliminations: 90,
+      iceCount: 10,
+      totalEliminations: 40,
       maxCombo: 3
     }
   },
@@ -184,23 +163,20 @@ export const LEVELS: LevelConfig[] = [
     name: "Special Delivery",
     chineseName: "特效漫天",
     description: "Extremely high spawning rate of special tiles! Take absolute advantage of combining adjacent specials together!",
-    chineseDescription: "极高概率直接生成特效字母！这关专为双重特殊字母合击而设计，来一场震撼的连环大爆炸吧！",
+    chineseDescription: "专供体验解压大连击的游乐场！中央留空，伴随着极高的高级炸弹出现机率！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 0, 0, 0, 0, 1, 1],
-      [1, 1, 0, 0, 0, 0, 1, 1],
-      [1, 1, 0, 0, 0, 0, 1, 1],
-      [1, 1, 0, 0, 0, 0, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 0, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 18000,
-    movesLimit: 25,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 6000,
+    movesLimit: 20,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.25,
     specialGoals: {
-      totalEliminations: 105,
+      totalEliminations: 45,
       maxCombo: 3
     }
   },
@@ -209,24 +185,21 @@ export const LEVELS: LevelConfig[] = [
     name: "The Butterfly",
     chineseName: "蝶翼迷踪",
     description: "Symmetrical winged chessboard. Outer edges are frozen. Break through the wings!",
-    chineseDescription: "对称型蝴蝶双翼棋盘，翅膀边缘覆盖冰块。通过消除点亮并击破蝴蝶双翼层！",
+    chineseDescription: "精致的蝴蝶蝶翼双侧棋盘。蝴蝶的四角和中枢带有坚硬霜层，在闪烁高光中逐级瓦解它们！",
     layout: [
-      [1, 1, 0, 0, 0, 0, 1, 1],
-      [1, 2, 1, 0, 0, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 1, 2, 1, 1, 2, 1, 0],
-      [0, 1, 2, 1, 1, 2, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 0, 0, 1, 2, 1],
-      [1, 1, 0, 0, 0, 0, 1, 1]
+      [1, 1, 0, 1, 1],
+      [1, 2, 1, 2, 1],
+      [1, 1, 1, 1, 1],
+      [0, 1, 2, 1, 0],
+      [1, 1, 0, 1, 1]
     ],
-    scoreGoal: 22000,
-    movesLimit: 30,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.16,
+    scoreGoal: 6800,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.18,
     specialGoals: {
-      iceCount: 8,
-      totalEliminations: 100,
+      iceCount: 4,
+      totalEliminations: 40,
       maxCombo: 3
     }
   },
@@ -235,23 +208,20 @@ export const LEVELS: LevelConfig[] = [
     name: "Hourglass Crisis",
     chineseName: "时间沙漏",
     description: "Very tight center funnel limits standard falls. Create vertical blasts to force a flow!",
-    chineseDescription: "沙漏形的极窄中部，极大限制了下方碎片的常规坠落。善用各种条纹爆破来疏通全场！",
+    chineseDescription: "沙漏形的极窄管道阻挡了大部分自然掉落，合成行爆破或十字黑洞能产生最棒的碎石流动！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1, 0],
-      [0, 0, 1, 1, 1, 1, 0, 0],
-      [0, 0, 0, 1, 1, 0, 0, 0],
-      [0, 0, 0, 1, 1, 0, 0, 0],
-      [0, 0, 1, 1, 1, 1, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 0],
+      [0, 1, 1, 1, 0],
+      [0, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 25000,
-    movesLimit: 22,
+    scoreGoal: 7200,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.15,
+    initialSpecialProbability: 0.16,
     specialGoals: {
-      totalEliminations: 75,
+      totalEliminations: 38,
       maxCombo: 3
     }
   },
@@ -260,25 +230,22 @@ export const LEVELS: LevelConfig[] = [
     name: "Frost Ring",
     chineseName: "冰环试炼",
     description: "Full outer frozen border! Create blasts at the center to shatter ice ring.",
-    chineseDescription: "外围一整圈被冰霜封锁！你需要在中央制造强大的清屏道具，里应外合击碎所有外环寒冰！",
+    chineseDescription: "外侧一整圈全部被坚韧极其厚重的冰块牢牢锁死！从棋盘核心制造炸药一举粉碎冰环阻挡！",
     layout: [
-      [2, 2, 2, 2, 2, 2, 2, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 1, 0, 0, 0, 0, 1, 2],
-      [2, 1, 0, 0, 0, 0, 1, 2],
-      [2, 1, 0, 0, 0, 0, 1, 2],
-      [2, 1, 0, 0, 0, 0, 1, 2],
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [2, 2, 2, 2, 2, 2, 2, 2]
+      [2, 2, 2, 2, 2],
+      [2, 1, 1, 1, 2],
+      [2, 1, 0, 1, 2],
+      [2, 1, 1, 1, 2],
+      [2, 2, 2, 2, 2]
     ],
-    scoreGoal: 28000,
-    movesLimit: 35,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 8000,
+    movesLimit: 24,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.18,
     specialGoals: {
-      iceCount: 24,
-      totalEliminations: 115,
-      maxCombo: 4
+      iceCount: 14,
+      totalEliminations: 50,
+      maxCombo: 3
     }
   },
   {
@@ -286,24 +253,21 @@ export const LEVELS: LevelConfig[] = [
     name: "Stairway to Heaven",
     chineseName: "步步高升",
     description: "Redesigned ascending diagonal stairway pattern with stable pillars! Maximizes matches without visual stalemates.",
-    chineseDescription: "重新设计的不规则对角阶梯。保留了节节高的斜向梯形美感，同时拓宽了流动通路，彻底告别死局！",
+    chineseDescription: "经典的斜角对角线阶梯城堡，加入了底部冰霜。收集指定的水果图案并激活大型引信！",
     layout: [
-      [0, 0, 0, 0, 0, 1, 1, 1],
-      [0, 0, 0, 0, 1, 1, 1, 1],
-      [0, 0, 0, 1, 1, 1, 1, 1],
-      [0, 0, 1, 1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 2, 2, 1, 1, 1]
+      [0, 0, 1, 1, 1],
+      [0, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 2, 2, 1]
     ],
-    scoreGoal: 12000,
-    movesLimit: 25,
+    scoreGoal: 5000,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.14,
+    initialSpecialProbability: 0.15,
     specialGoals: {
-      letter: { 'C': 25, 'D': 25 },
-      totalEliminations: 80,
+      letter: { 'C': 10, 'D': 10 },
+      totalEliminations: 45,
       maxCombo: 3
     }
   },
@@ -312,24 +276,21 @@ export const LEVELS: LevelConfig[] = [
     name: "Transient Fusion",
     chineseName: "瞬态熔聚",
     description: "Ice barriers protect a nuclear empty core. Combine starting specials to blast open the reactive chamber!",
-    chineseDescription: "高能空心核能室，四周包围坚固的核阻冰墙。充分蓄力引爆中心冰墙，感受裂变能量波动的爽快感！",
+    chineseDescription: "高能核能能量环。中心带有留空和核晶冰保护，利用双重重力交换产生超新星裂变！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 2, 2, 2, 2, 1, 1],
-      [1, 1, 2, 0, 0, 2, 1, 1],
-      [1, 1, 2, 0, 0, 2, 1, 1],
-      [1, 1, 2, 2, 2, 2, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 2, 0, 2, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 32000,
-    movesLimit: 28,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 9500,
+    movesLimit: 20,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.22,
     specialGoals: {
-      iceCount: 12,
-      totalEliminations: 95,
+      iceCount: 2,
+      totalEliminations: 45,
       maxCombo: 3
     }
   },
@@ -337,26 +298,22 @@ export const LEVELS: LevelConfig[] = [
     id: 14,
     name: "Combo Heaven",
     chineseName: "连消天堂",
-    description: "Highly reactive 9x9 massive playground with only 4 letters allowed! Triggers magnificent endless cascade chain reactions!",
-    chineseDescription: "超级刺激的 9x9 大型棋盘，仅仅只包含4种字母元素！让你不费吹灰之力，体验全屏无限连消的顶级爽快解压！",
+    description: "Highly reactive massive playground with only 4 letters allowed! Triggers magnificent endless cascade chain reactions!",
+    chineseDescription: "消除达人的解压乐园！5x5中等规格只包含4种基础类型图案，几乎每次交换都会触发超能连消！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 34000,
-    movesLimit: 28,
+    scoreGoal: 10000,
+    movesLimit: 20,
     allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.25,
     specialGoals: {
-      totalEliminations: 150,
-      maxCombo: 5
+      totalEliminations: 60,
+      maxCombo: 4
     }
   },
   {
@@ -364,25 +321,22 @@ export const LEVELS: LevelConfig[] = [
     name: "Ice Castle Siege",
     chineseName: "攻占寒星堡",
     description: "Top and bottom frozen ramparts defend the treasure. Break adjacent combinations to siege the fortress!",
-    chineseDescription: "极昼寒星堡的顶部与底部冻结箭塔。在中央空旷区域精巧走位制造合成特效，由内而外击毁寒霜防线！",
+    chineseDescription: "坚不可摧的碎石堡垒，带有上下交替的冰晶防线。在开阔地蓄力爆破击溃一切！",
     layout: [
-      [2, 0, 2, 0, 2, 0, 2, 0],
-      [2, 1, 2, 1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1, 2, 1, 2],
-      [2, 2, 2, 2, 2, 2, 2, 2]
+      [2, 0, 2, 0, 2],
+      [2, 1, 1, 1, 2],
+      [1, 1, 1, 1, 1],
+      [1, 2, 1, 2, 1],
+      [2, 2, 2, 2, 2]
     ],
-    scoreGoal: 38000,
-    movesLimit: 32,
+    scoreGoal: 11000,
+    movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.19,
+    initialSpecialProbability: 0.20,
     specialGoals: {
-      iceCount: 12,
-      totalEliminations: 110,
-      maxCombo: 4
+      iceCount: 6,
+      totalEliminations: 50,
+      maxCombo: 3
     }
   },
   {
@@ -390,25 +344,22 @@ export const LEVELS: LevelConfig[] = [
     name: "X-Reactor Cross",
     chineseName: "极耀十字爆",
     description: "A gorgeous X-shaped frozen blockade dividing the board! Shattering the diagonal shield causes massive cross-collapses!",
-    chineseDescription: "宏大的X型交叉对角冰桥，将版块切割为四等分！粉碎对角线上的冰霜水晶，引发全方向的超级几何塌陷！",
+    chineseDescription: "庞大的X对角光环冰墙，把棋盘整体切碎为四份！粉碎冰晶以激活连通的对角落差！",
     layout: [
-      [2, 1, 1, 1, 1, 1, 1, 2],
-      [1, 2, 1, 1, 1, 1, 2, 1],
-      [1, 1, 2, 1, 1, 2, 1, 1],
-      [1, 1, 1, 2, 2, 1, 1, 1],
-      [1, 1, 1, 2, 2, 1, 1, 1],
-      [1, 1, 2, 1, 1, 2, 1, 1],
-      [1, 2, 1, 1, 1, 1, 2, 1],
-      [2, 1, 1, 1, 1, 1, 1, 2]
+      [2, 1, 1, 1, 2],
+      [1, 2, 1, 2, 1],
+      [1, 1, 2, 1, 1],
+      [1, 2, 1, 2, 1],
+      [2, 1, 1, 1, 2]
     ],
-    scoreGoal: 42000,
-    movesLimit: 34,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 12000,
+    movesLimit: 24,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.20,
     specialGoals: {
-      iceCount: 14,
-      totalEliminations: 115,
-      maxCombo: 4
+      iceCount: 6,
+      totalEliminations: 55,
+      maxCombo: 3
     }
   },
   {
@@ -416,25 +367,22 @@ export const LEVELS: LevelConfig[] = [
     name: "Cosmic Channels",
     chineseName: "星海跃迁道",
     description: "Symmetrical pocket corridors linked by narrow gravity gates. Chain sideways blasters to swap matter instantly!",
-    chineseDescription: "对称的多维星际口袋道，被中间两道窄门阻断。通过创造横向波动激光特效，在通道间实现炫彩高能打击！",
+    chineseDescription: "由两端跃迁而来的平行通道。必须充分制造横向极光爆破或者炸弹去清理死角！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 1, 1, 2, 1],
-      [1, 0, 1, 1, 1, 1, 0, 1],
-      [1, 1, 1, 2, 2, 1, 1, 1],
-      [1, 1, 1, 2, 2, 1, 1, 1],
-      [1, 0, 1, 1, 1, 1, 0, 1],
-      [1, 2, 1, 1, 1, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1],
+      [1, 2, 1, 2, 1],
+      [1, 0, 1, 0, 1],
+      [1, 2, 1, 2, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 46000,
-    movesLimit: 30,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 13000,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.24,
     specialGoals: {
-      letter: { 'E': 25, 'F': 25 },
-      totalEliminations: 105,
-      maxCombo: 4
+      letter: { 'C': 10, 'D': 10 },
+      totalEliminations: 55,
+      maxCombo: 3
     }
   },
   {
@@ -442,25 +390,22 @@ export const LEVELS: LevelConfig[] = [
     name: "Gold Sieve Trident",
     chineseName: "淘冰黄金戟",
     description: "Three thin vertical channels cascade into a wide base pool. Liquid layouts deliver superb dropping cascade feelings!",
-    chineseDescription: "三条狭长高空落差通道，在底部汇合并泄流。超长落差造就完美的重力崩塌感，让连击源源不断！",
+    chineseDescription: "黄金三叉戟布局。三道极深的垂直落差使碎料能产生极高能的连续重力撞击！",
     layout: [
-      [1, 0, 1, 0, 1, 0, 1, 0],
-      [1, 0, 1, 0, 1, 0, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1, 2, 1, 2],
-      [1, 2, 2, 2, 2, 2, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 0, 1, 0, 1],
+      [1, 0, 1, 0, 1],
+      [1, 1, 1, 1, 1],
+      [1, 2, 2, 2, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 50000,
-    movesLimit: 30,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 14000,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.18,
     specialGoals: {
-      iceCount: 10,
-      totalEliminations: 110,
-      maxCombo: 4
+      iceCount: 3,
+      totalEliminations: 55,
+      maxCombo: 3
     }
   },
   {
@@ -468,25 +413,22 @@ export const LEVELS: LevelConfig[] = [
     name: "Infinity Loop Orbit",
     chineseName: "时空无限环",
     description: "Symmetric nested infinity layout tracking infinite flow. High strategic swapping maximizes incredible specials combinations!",
-    chineseDescription: "完美的无限符号流转轨道。异型环状结构使滑动重组更加考验智慧，能极其丝滑地合成高级爆破星星！",
+    chineseDescription: "扭曲的莫比乌斯星轨。奇妙的多维重疊空位，考验您在复杂几何环路中的合击逻辑！",
     layout: [
-      [0, 1, 1, 1, 1, 1, 1, 0],
-      [1, 1, 2, 1, 1, 2, 1, 1],
-      [1, 2, 0, 1, 1, 0, 2, 1],
-      [1, 1, 1, 0, 0, 1, 1, 1],
-      [1, 0, 0, 1, 1, 0, 0, 1],
-      [1, 2, 0, 1, 1, 0, 2, 1],
-      [1, 1, 2, 1, 1, 2, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1, 0]
+      [0, 1, 1, 1, 0],
+      [1, 1, 2, 1, 1],
+      [1, 2, 0, 2, 1],
+      [1, 1, 2, 1, 1],
+      [0, 1, 1, 1, 0]
     ],
-    scoreGoal: 55000,
-    movesLimit: 28,
+    scoreGoal: 15000,
+    movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.22,
     specialGoals: {
-      iceCount: 8,
-      totalEliminations: 115,
-      maxCombo: 4
+      iceCount: 4,
+      totalEliminations: 55,
+      maxCombo: 3
     }
   },
   {
@@ -494,26 +436,23 @@ export const LEVELS: LevelConfig[] = [
     name: "Millennium Spark",
     chineseName: "终极圣殿",
     description: "The grand master level. Huge full grid with challenging goals and dual combination possibilities!",
-    chineseDescription: "千回百折的终极试炼课！极大的高阶异形拼图，要求你用毕生所学特效，创造奇迹！",
+    chineseDescription: "千汇万状的终极盛典！中大规模的异形冰晶九重殿，尽情释放您的魔法黑洞绝技去通关吧！",
     layout: [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 1, 1, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 1, 1, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 2, 2, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 75000,
-    movesLimit: 40,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    scoreGoal: 20000,
+    movesLimit: 26,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.22,
     specialGoals: {
-      iceCount: 12,
-      totalEliminations: 140,
-      maxCombo: 5
+      iceCount: 6,
+      totalEliminations: 70,
+      maxCombo: 4
     }
   }
 ];

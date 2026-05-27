@@ -246,132 +246,162 @@ export default function ScoreBoard({
       </div>
 
       {/* ──────────────────────────────────────────────────────── */}
-      {/* 2. MOBILE PLAY VIEWPORT FRAME (ULTRA CONCISE HUD HEADER) */}
+      {/* 2. MOBILE PLAY VIEWPORT FRAME (UNIFIED HIGH-POLISH WOOD HUD) */}
       {/* ──────────────────────────────────────────────────────── */}
-      <div className="block md:hidden w-full flex flex-col justify-start" id="mobile-play-frame-container">
-        {/* Ultra-narrow header bar styled with wood look */}
-        <div className="w-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-xl px-1.5 py-1.5 flex items-center justify-between gap-1.5 text-xs font-mono select-none" id="mobile-top-hud">
-          
-          {/* Stage name */}
-          <span className="rounded bg-indigo-650 px-1.5 py-0.5 text-[10px] text-white font-black shrink-0">
+      <div className="block md:hidden w-full flex-1 flex flex-col justify-between pt-1" id="mobile-play-frame-container">
+        {/* Top Header Controls bar */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-amber-700 via-amber-650 to-amber-800 border-2 border-amber-900 rounded-xl px-2.5 py-1 shadow-md mb-2" id="mobile-top-hud">
+          {/* Level Identification badge */}
+          <span className="font-sans font-black text-xs text-white">
             LV {level.id}
           </span>
-
-          {/* Target clear indicator list */}
-          <div className="flex-1 flex gap-1 items-center justify-center min-w-0">
-            {/* Ice list item */}
-            {level.specialGoals?.iceCount !== undefined && (
-              <div 
-                onClick={onIceGoalClick}
-                className={`flex items-center gap-0.5 text-[10px] px-1 py-0.5 rounded leading-none font-bold transition-all shrink-0 cursor-pointer ${
-                  isIceHighlighted 
-                    ? 'bg-cyan-500 text-slate-950' 
-                    : 'bg-cyan-950/30 text-cyan-400 border border-cyan-900/30'
-                }`}
-              >
-                <span>❄️</span>
-                <span>
-                  {Math.min(level.specialGoals.iceCount, goalsProgress.iceCleared)}/{level.specialGoals.iceCount}
-                </span>
-              </div>
-            )}
-
-            {/* Total Cleared list item */}
-            {level.specialGoals?.totalEliminations !== undefined && (
-              <div className="flex items-center gap-0.5 text-[10px] text-yellow-400 px-1 py-0.5 rounded bg-yellow-950/30 border border-yellow-900/30 font-bold shrink-0 leading-none">
-                <span>💥</span>
-                <span>
-                  {Math.min(level.specialGoals.totalEliminations, goalsProgress.totalEliminations)}/{level.specialGoals.totalEliminations}
-                </span>
-              </div>
-            )}
-
-            {/* Direct matches targets inline list */}
-            {level.specialGoals?.letter && Object.keys(level.specialGoals.letter).map((letKey) => {
-              const letterTyped = letKey as Letter;
-              const targetCount = level.specialGoals?.letter?.[letterTyped] || 0;
-              const currentCount = goalsProgress.letterClearedCount[letterTyped] || 0;
-              return (
-                <div 
-                  key={letKey} 
-                  className="flex items-center gap-0.5 text-[10px] text-indigo-300 px-1 py-0.5 rounded bg-indigo-950/20 font-bold shrink-0 leading-none"
-                >
-                  <img 
-                    src={imageMap[letterTyped] || pic1} 
-                    className="h-3 w-3 object-contain"
-                    alt={letterTyped}
-                    referrerPolicy="no-referrer"
-                  />
-                  <span>
-                    {currentCount}/{targetCount}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Moves remaining limit indicator badge */}
-          <div className="flex items-center gap-0.5 px-1.5 py-0.5 bg-slate-950/60 rounded border border-slate-800 shrink-0 font-bold">
-            <span className="text-[9px] text-slate-500 uppercase tracking-tighter">步数:</span>
-            <span className={`text-[11px] leading-none ${movesRemaining <= 4 ? 'text-rose-500 animate-pulse font-black' : 'text-amber-400'}`}>
-              {movesRemaining}
-            </span>
-          </div>
-
-          {/* Circle Mini Controls buttons list for home, reload, sound */}
-          <div className="flex items-center gap-1 shrink-0">
-            {/* Audio volume toggler info */}
-            <button
-              onClick={onToggleSound}
-              className="flex h-5.5 w-5.5 items-center justify-center rounded-md bg-slate-850 hover:bg-slate-800 text-slate-400 transition-all cursor-pointer active:scale-95"
-              id="mobile-sound-btn"
-            >
-              {soundEnabled ? (
-                <Volume2 className="h-3 w-3 text-emerald-400" />
-              ) : (
-                <VolumeX className="h-3 w-3 text-slate-500" />
-              )}
-            </button>
-
-            {/* Level reload action */}
-            <button
-              onClick={onResetLevel}
-              className="flex h-5.5 w-5.5 items-center justify-center rounded-md bg-slate-850 hover:bg-slate-800 text-slate-400 transition-all cursor-pointer active:scale-95"
-              id="mobile-reset-btn"
-            >
-              <RotateCcw className="h-3 w-3 text-amber-500" />
-            </button>
-
-            {/* Stage Selector Exit click */}
+          
+          {/* Action controllers row */}
+          <div className="flex gap-1.5">
+            {/* Level Selector Selector button */}
             <button
               onClick={onBackToMenu}
-              className="flex h-5.5 w-5.5 items-center justify-center rounded-md bg-slate-850 hover:bg-slate-800 text-slate-400 transition-all cursor-pointer active:scale-90"
-              id="mobile-home-btn"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950 text-amber-100 border border-slate-850 transition-all active:scale-90 cursor-pointer"
+              title="Home"
             >
-              <Home className="h-3 w-3 text-indigo-400" />
+              <Home className="h-3.5 w-3.5" />
+            </button>
+
+            {/* Reset level reload button */}
+            <button
+              onClick={onResetLevel}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950 text-amber-100 border border-slate-850 transition-all active:scale-90 cursor-pointer"
+              title="Reset"
+            >
+              <RotateCcw className="h-3.5 w-3.5 text-amber-400" />
+            </button>
+
+            {/* Volume toggle mute/unmute action button */}
+            <button
+              onClick={onToggleSound}
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-950 border border-slate-850 transition-all active:scale-95 cursor-pointer"
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-3.5 w-3.5 text-emerald-400" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5 text-slate-500" />
+              )}
             </button>
           </div>
-
         </div>
 
-        {/* Small horizontal score bar energy line with stars indicators */}
-        <div className="w-full mt-1.5 mb-1.5 px-1 relative flex items-center gap-1.5 bg-slate-950/40 p-1 rounded-md border border-slate-900" id="mobile-score-meter-progress">
-          <div className="flex-1 h-1.5 bg-slate-900 rounded-full overflow-hidden relative">
-            <div 
-              className="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full transition-all duration-300" 
-              style={{ width: `${scorePercent}%` }}
-            />
+        {/* Dynamic wood deck holding identical panels to desktop style */}
+        <div className="grid grid-cols-[1.3fr_1fr] gap-2 mb-2 select-none" id="mobile-wood-deck">
+          {/* Goals Card (目标) */}
+          <div className="bg-gradient-to-b from-amber-805 to-amber-950 border-2 border-amber-900 rounded-xl p-2 shadow-md flex flex-col justify-between">
+            <div className="text-[9px] font-black text-center bg-amber-950/80 text-amber-300 py-0.5 px-1.5 rounded tracking-wider">
+              目标
+            </div>
+
+            <div className="grid grid-cols-2 gap-1 mt-1.5 items-center justify-center">
+              {/* Ice target */}
+              {level.specialGoals?.iceCount !== undefined && (
+                <div 
+                  onClick={onIceGoalClick}
+                  className={`flex items-center justify-between px-1.5 py-1 rounded-md border cursor-pointer select-none transition-all ${
+                    isIceHighlighted 
+                      ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]' 
+                      : 'bg-slate-950/60 border-slate-850'
+                  }`}
+                >
+                  <span className="text-xs">❄️</span>
+                  <span className="font-mono font-black text-[10px] text-cyan-300">
+                    {Math.min(level.specialGoals.iceCount, goalsProgress.iceCleared)}/{level.specialGoals.iceCount}
+                  </span>
+                </div>
+              )}
+
+              {/* Total clearing target */}
+              {level.specialGoals?.totalEliminations !== undefined && (
+                <div className="flex items-center justify-between px-1.5 py-1 rounded-md border border-slate-850 bg-slate-950/60">
+                  <span className="text-xs text-yellow-400">💥</span>
+                  <span className="font-mono font-black text-[10px] text-yellow-400">
+                    {Math.min(level.specialGoals.totalEliminations, goalsProgress.totalEliminations)}/{level.specialGoals.totalEliminations}
+                  </span>
+                </div>
+              )}
+
+              {/* Direct matches targets list */}
+              {level.specialGoals?.letter && Object.keys(level.specialGoals.letter).map((letKey) => {
+                const letterTyped = letKey as Letter;
+                const targetCount = level.specialGoals?.letter?.[letterTyped] || 0;
+                const currentCount = goalsProgress.letterClearedCount[letterTyped] || 0;
+                return (
+                  <div key={letKey} className="flex items-center justify-between px-1.5 py-1 rounded-md border border-slate-850 bg-slate-950/60">
+                    <img 
+                      src={imageMap[letterTyped] || pic1} 
+                      className="h-3 w-3 object-contain"
+                      alt={letterTyped}
+                      referrerPolicy="no-referrer"
+                    />
+                    <span className="font-mono font-black text-[10px] text-indigo-300">
+                      {currentCount}/{targetCount}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <span className="font-mono text-[9px] text-zinc-400 font-bold shrink-0">
-            {score}/{level.scoreGoal}
-          </span>
+
+          {/* Combined Moves & Score beaker display columns */}
+          <div className="flex flex-col justify-between gap-1.5">
+            {/* Moves Indicator Panel */}
+            <div className="bg-gradient-to-b from-amber-805 to-amber-950 border-2 border-amber-900 rounded-xl p-1 shadow-md flex items-center justify-between px-2">
+              <span className="text-[9px] font-black bg-amber-950/80 text-amber-300 py-0.5 px-1.5 rounded tracking-wide uppercase">
+                步数
+              </span>
+              <div className={`h-7 w-7 rounded-full flex items-center justify-center border shadow-inner transition-all ${
+                movesRemaining <= 5 
+                  ? 'bg-rose-950/60 border-rose-650 animate-pulse' 
+                  : 'bg-amber-900/45 border-amber-700'
+              }`}>
+                <span className={`font-mono text-xs font-black ${
+                  movesRemaining <= 5 ? 'text-rose-455' : 'text-amber-450'
+                }`}>
+                  {movesRemaining}
+                </span>
+              </div>
+            </div>
+
+            {/* Score beaker progress slab */}
+            <div className="flex-1 bg-slate-900/80 border border-slate-800 rounded-xl p-1.5 flex items-center justify-between px-2 shadow-inner">
+              <div className="flex flex-col items-center">
+                <span className="font-mono font-black text-[11px] text-white leading-none">
+                  {score}
+                </span>
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider mt-0.5">
+                  得分
+                </span>
+              </div>
+              
+              {/* Progress and Stars deck */}
+              <div className="flex-1 ml-1.5 flex flex-col justify-center gap-1.5">
+                <div className="w-full h-1.5 bg-slate-950 border border-slate-850 rounded-full overflow-hidden relative">
+                  <div 
+                    className="bg-gradient-to-r from-cyan-500 via-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(6,182,212,0.4)]" 
+                    style={{ width: `${scorePercent}%` }}
+                  />
+                </div>
+                {/* Horizontal ratings stars */}
+                <div className="flex justify-between items-center px-0.5">
+                  <Star className={`h-2.5 w-2.5 ${isStar1 ? 'text-yellow-400 fill-current' : 'text-slate-650'}`} />
+                  <Star className={`h-2.5 w-2.5 ${isStar2 ? 'text-yellow-400 fill-current' : 'text-slate-650'}`} />
+                  <Star className={`h-2.5 w-2.5 ${isStar3 ? 'text-yellow-400 fill-current' : 'text-slate-650'}`} />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Main Board display rendered under top HUD */}
-        <div className="w-full flex items-center justify-center">
+        {/* Board Placement Section - Pushed down layout container for high finger ergonomic clearance on smartphones */}
+        <div className="w-full pt-6 pb-8 flex items-center justify-center mt-auto mb-4" id="mobile-gameboard-slot">
           {children}
         </div>
-
       </div>
 
     </div>

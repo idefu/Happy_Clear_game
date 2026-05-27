@@ -29,6 +29,9 @@ export default function LevelSelector({
 
   // Find the highest unlocked stage to play immediately
   const highestUnlockedId = React.useMemo(() => {
+    const totalLevels = Array.isArray(levels) ? levels.length : 0;
+    if (totalLevels === 0) return 1;
+
     let highest = 1;
     for (const lvl of levels) {
       const isFirst = lvl.id === 1;
@@ -37,7 +40,8 @@ export default function LevelSelector({
         highest = lvl.id;
       }
     }
-    return highest;
+    // Strict clamp: never exceed 20 (as there are only 20 levels defined in levels.ts) or totalLevels
+    return Math.min(highest, 20, totalLevels);
   }, [levels, highScores]);
 
   // Helper code to map score to star count (1 to 3 stars)
@@ -106,8 +110,39 @@ export default function LevelSelector({
           {/* Visual Header content */}
           <div className="relative z-25 w-full flex flex-col items-center max-w-sm space-y-6">
             <div className="space-y-1.5 px-4">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-wider text-rose-50 drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)] font-sans">
-                快乐消消乐
+              <h1 className="flex justify-center items-center gap-1.5 text-4xl sm:text-5xl md:text-6xl font-black tracking-tight select-none py-1 filter drop-shadow-[0_5px_12px_rgba(0,0,0,0.95)]">
+                {['快', '乐', '消', '消', '乐'].map((char, index) => {
+                  const colorGradients = [
+                    "from-yellow-300 via-amber-400 to-orange-500", // 快
+                    "from-rose-300 via-pink-500 to-red-650",      // 乐
+                    "from-cyan-300 via-blue-400 to-indigo-600",    // 消
+                    "from-emerald-300 via-teal-400 to-green-600",  // 消
+                    "from-purple-300 via-fuchsia-400 to-pink-500"  // 乐
+                  ];
+                  return (
+                    <motion.span
+                      key={index}
+                      initial={{ y: 0 }}
+                      animate={{ y: [2, -10, 2] }}
+                      transition={{
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        duration: 1.0 + index * 0.12,
+                        ease: "easeInOut"
+                      }}
+                      className="relative inline-block px-0.5 text-center"
+                    >
+                      {/* Deep 3D Shadow Backdrop */}
+                      <span className="absolute inset-x-0 top-1 text-black font-extrabold select-none opacity-85 text-shadow-deep">
+                        {char}
+                      </span>
+                      {/* High-quality styled gradient text with outline feel */}
+                      <span className={`relative bg-gradient-to-b ${colorGradients[index]} bg-clip-text text-transparent font-black block`}>
+                        {char}
+                      </span>
+                    </motion.span>
+                  );
+                })}
               </h1>
               <p className="text-emerald-450 font-mono text-[10px] sm:text-xs font-black tracking-widest uppercase drop-shadow-[0_2px_5px_rgba(0,0,0,0.9)]">
                 ★ HAPPY ELIMINATION ADVENTURE ★
@@ -123,7 +158,7 @@ export default function LevelSelector({
             {/* Lower Stack Action Buttons */}
             <div className="w-full space-y-3 px-4">
               <button
-                onClick={() => onSelectLevel(highestUnlockedId)}
+                onClick={() => setShowGrid(true)}
                 className="w-full py-3 sm:py-4 bg-gradient-to-b from-amber-505 via-amber-600 to-amber-700 hover:from-amber-450 hover:to-amber-650 text-white rounded-xl font-extrabold text-base transition-transform active:scale-95 shadow-[0_5px_15px_rgba(217,119,6,0.5)] border-2 border-amber-400/40 cursor-pointer flex items-center justify-center gap-2"
                 id="lobby-primary-play-btn"
               >
@@ -143,7 +178,7 @@ export default function LevelSelector({
 
             {/* Bottom mini footnote */}
             <span className="text-[10px] font-mono text-amber-500/80 drop-shadow font-bold bg-amber-955/30 px-2.5 py-0.5 rounded-full select-none">
-              当前可直接挑战第 {highestUnlockedId} 关
+              - 快乐大消除 尽享连连击 -
             </span>
           </div>
 
