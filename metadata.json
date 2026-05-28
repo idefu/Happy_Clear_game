@@ -1,5 +1,5 @@
 {
-  "name": "快乐消消乐 Launcher",
+  "name": "快乐消消乐",
   "description": "A high-performance, polished match-3 puzzle game featuring colorful emoji shapes with explosive chain reactions, diverse levels, score tracking, and immersive particle visual animations.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
