@@ -7,6 +7,7 @@ import React from 'react';
 import { Home, RotateCcw, Volume2, VolumeX, Star, HelpCircle, Sparkles, Heart } from 'lucide-react';
 import { motion } from 'motion/react';
 import { LevelConfig, Letter } from '../types';
+import { useTranslation } from '../utils/i18n';
 
 import pic1 from '../../pic/1.png';
 import pic2 from '../../pic/2.png';
@@ -58,6 +59,7 @@ export default function ScoreBoard({
   onIceGoalClick,
   children
 }: ScoreBoardProps) {
+  const { t } = useTranslation();
   // Score percentage representing energy filling up standard
   const scorePercent = Math.min(100, Math.floor((score / level.scoreGoal) * 100));
 
@@ -88,7 +90,7 @@ export default function ScoreBoard({
             </div>
             <div className="bg-gradient-to-r from-pink-405 to-amber-400 border-2 border-white rounded-2xl px-4 py-2 shadow-md text-sm md:text-base font-black text-slate-900 tracking-wider flex items-center justify-center gap-1">
               <Sparkles className="h-4 w-4 text-white animate-spin" style={{ animationDuration: '6s' }} />
-              <span>关卡 {level.id}</span>
+              <span>{t('levelTitle')} {level.id}</span>
             </div>
           </div>
 
@@ -97,7 +99,7 @@ export default function ScoreBoard({
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-pink-400 via-yellow-300 to-cyan-400 opacity-70" />
             
             <div className="text-[11px] font-black text-center bg-pink-500 text-white py-1 px-3 rounded-xl tracking-widest uppercase shadow-sm">
-              🌟 开启挑战
+              {t('challengeStart')}
             </div>
 
             <div className="flex flex-col gap-2 items-center justify-center">
@@ -113,7 +115,7 @@ export default function ScoreBoard({
                   }`}
                   id="desktop-ice-goal"
                 >
-                  <span className="text-lg">❄️ 霜层</span>
+                  <span className="text-lg">{t('frostGlass')}</span>
                   <span className="font-sans font-black text-sm lg:text-base text-cyan-300">
                     {Math.min(level.specialGoals.iceCount, goalsProgress.iceCleared)}/{level.specialGoals.iceCount}
                   </span>
@@ -123,7 +125,7 @@ export default function ScoreBoard({
               {/* Total clearing target */}
               {level.specialGoals?.totalEliminations !== undefined && (
                 <div className="flex items-center justify-between w-full p-2.5 rounded-2xl border-2 border-amber-500/20 bg-slate-950/70">
-                  <span className="text-lg">💥 消除</span>
+                  <span className="text-lg">{t('eliminatingGrid')}</span>
                   <span className="font-sans font-black text-sm lg:text-base text-yellow-300">
                     {Math.min(level.specialGoals.totalEliminations, goalsProgress.totalEliminations)}/{level.specialGoals.totalEliminations}
                   </span>
@@ -133,7 +135,7 @@ export default function ScoreBoard({
               {/* Max Combo target */}
               {level.specialGoals?.maxCombo !== undefined && (
                 <div className="flex items-center justify-between w-full p-2.5 rounded-2xl border-2 border-purple-500/20 bg-slate-950/70">
-                  <span className="text-xs font-black text-purple-300">⚡ 连击数</span>
+                  <span className="text-xs font-black text-purple-300">{t('comboCountMetric')}</span>
                   <span className={`font-sans font-black text-sm lg:text-base ${goalsProgress.maxComboAchieved >= level.specialGoals.maxCombo ? 'text-emerald-450' : 'text-amber-300'}`}>
                     {goalsProgress.maxComboAchieved}/{level.specialGoals.maxCombo}
                   </span>
@@ -171,7 +173,7 @@ export default function ScoreBoard({
           {/* Moves Left (步数) - Sweet Bubble Round layout */}
           <div className="w-full bg-gradient-to-b from-indigo-900/90 to-purple-950/95 border-2 border-pink-400/30 rounded-3xl p-3 shadow-lg text-center relative">
             <div className="text-[11px] font-black text-center bg-pink-500 text-white py-1 px-3 rounded-xl tracking-widest uppercase mb-2">
-              剩余步数
+              {t('movesPercentText')}
             </div>
             
             <div className="flex justify-center py-0.5">
@@ -219,7 +221,7 @@ export default function ScoreBoard({
                 {score}
               </span>
               <span className="text-[10px] font-black text-pink-100 tracking-wider uppercase mt-1">
-                得分
+                {t('scoreLabel')}
               </span>
             </div>
           </div>
@@ -240,7 +242,7 @@ export default function ScoreBoard({
             onClick={onBackToMenu}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-purple-400 to-indigo-650 text-white border-2 border-white shadow-lg cursor-pointer"
             id="control-btn-home"
-            title="返回主干大厅"
+            title={t('backToLobby')}
           >
             <Home className="h-5 w-5 stroke-[2.5]" />
           </motion.button>
@@ -252,7 +254,7 @@ export default function ScoreBoard({
             onClick={onResetLevel}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-yellow-300 to-orange-500 text-slate-900 border-2 border-white shadow-lg cursor-pointer"
             id="control-btn-reset"
-            title="重新开始本关"
+            title={t('replayBtn')}
           >
             <RotateCcw className="h-5 w-5 stroke-[2.5] text-slate-900" />
           </motion.button>
@@ -284,7 +286,7 @@ export default function ScoreBoard({
         <div className="flex items-center justify-between bg-gradient-to-r from-pink-500 to-purple-650 border-2 border-white rounded-2xl px-3 py-1.5 shadow-md mb-2" id="mobile-top-hud">
           {/* Level badge */}
           <span className="font-sans font-black text-xs text-white tracking-wider bg-black/25 px-2.5 py-1 rounded-xl">
-            关卡 {level.id}
+            {t('levelTitle')} {level.id}
           </span>
           
           {/* Action controllers row */}
@@ -292,7 +294,7 @@ export default function ScoreBoard({
             <button
               onClick={onBackToMenu}
               className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white border border-white/20 active:scale-90 cursor-pointer"
-              title="返回大厅"
+              title={t('backToLobby')}
             >
               <Home className="h-4 w-4" />
             </button>
@@ -300,7 +302,7 @@ export default function ScoreBoard({
             <button
               onClick={onResetLevel}
               className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-300 text-slate-900 border border-white active:scale-90 cursor-pointer"
-              title="重试本关"
+              title={t('replayBtn')}
             >
               <RotateCcw className="h-4 w-4 stroke-[2.5]" />
             </button>
@@ -323,7 +325,7 @@ export default function ScoreBoard({
           {/* Card 1: Goals Card (col-span-5) */}
           <div className="col-span-5 bg-gradient-to-b from-indigo-900/90 to-purple-950/95 border-2 border-pink-400/30 rounded-2xl p-2 shadow-md flex flex-col justify-between min-h-[70px]">
             <div className="text-[10px] font-black text-center bg-pink-500 text-white py-0.5 px-2 rounded-lg tracking-wide uppercase">
-              目标
+              {t('challengeStart')}
             </div>
 
             <div className="flex-1 flex flex-col justify-center gap-1.5 mt-1.5">
@@ -337,7 +339,7 @@ export default function ScoreBoard({
                       : 'bg-slate-950/65 border-white/5'
                   }`}
                 >
-                  <span className="text-xs">❄️ 霜层</span>
+                  <span className="text-xs">{t('frostGlass')}</span>
                   <span className="font-sans font-black text-xs text-cyan-300">
                     {Math.min(level.specialGoals.iceCount, goalsProgress.iceCleared)}/{level.specialGoals.iceCount}
                   </span>
@@ -347,7 +349,7 @@ export default function ScoreBoard({
               {/* Total clearing target */}
               {level.specialGoals?.totalEliminations !== undefined && (
                 <div className="flex items-center justify-between px-1.5 py-0.5 rounded-lg border-2 border-white/5 bg-slate-950/65">
-                  <span className="text-xs">💥 消除</span>
+                  <span className="text-xs">{t('eliminatingGrid')}</span>
                   <span className="font-sans font-black text-xs text-yellow-305">
                     {Math.min(level.specialGoals.totalEliminations, goalsProgress.totalEliminations)}/{level.specialGoals.totalEliminations}
                   </span>
@@ -357,7 +359,7 @@ export default function ScoreBoard({
               {/* Max Combo target */}
               {level.specialGoals?.maxCombo !== undefined && (
                 <div className="flex items-center justify-between px-1.5 py-0.5 rounded-lg border-2 border-white/5 bg-slate-950/65">
-                  <span className="text-[9px] font-bold text-slate-400">⚡ 连击</span>
+                  <span className="text-[9px] font-bold text-slate-400">{t('comboCountMetric')}</span>
                   <span className={`font-sans font-black text-xs ${goalsProgress.maxComboAchieved >= level.specialGoals.maxCombo ? 'text-emerald-400' : 'text-amber-300'}`}>
                     {goalsProgress.maxComboAchieved}/{level.specialGoals.maxCombo}
                   </span>
@@ -389,7 +391,7 @@ export default function ScoreBoard({
           {/* Card 2: Moves Indicator Panel (col-span-3) */}
           <div className="col-span-3 bg-gradient-to-b from-indigo-900/90 to-purple-950/95 border-2 border-pink-400/30 rounded-2xl p-2 shadow-md flex flex-col items-center justify-between text-center min-h-[70px]">
             <span className="text-[10px] font-black w-full bg-pink-500 text-white py-0.5 px-1 rounded-lg tracking-wide uppercase text-center block">
-              步数
+              {t('movesPercentText')}
             </span>
             <div className="flex-1 flex items-center justify-center mt-1">
               <span className={`font-sans text-xl sm:text-2xl font-black ${
@@ -404,7 +406,7 @@ export default function ScoreBoard({
           <div className="col-span-4 bg-slate-900 border-2 border-pink-400/20 rounded-2xl p-2 shadow-inner flex flex-col justify-between min-h-[70px]">
             <div className="text-center">
               <span className="text-[9px] font-black text-pink-300 uppercase tracking-wider block">
-                得分
+                {t('scoreLabel')}
               </span>
               <span className="font-sans font-black text-xs sm:text-sm text-yellow-300 leading-none block mt-0.5">
                 {score}

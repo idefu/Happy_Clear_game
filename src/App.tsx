@@ -14,10 +14,12 @@ import WinLoseModal from './components/WinLoseModal';
 import { sound } from './utils/sound';
 import { Volume2, VolumeX, Sparkles, RefreshCcw, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from './utils/i18n';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default function App() {
+  const { t } = useTranslation();
   // Navigation states
   const [activeLevel, setActiveLevel] = useState<LevelConfig | null>(null);
   const currentLevelRef = useRef<LevelConfig | null>(null);
@@ -611,7 +613,7 @@ export default function App() {
             id="deadlock-toast-alert"
           >
             <RefreshCcw className="h-4 w-4 animate-spin" />
-            <span>🔄 棋盘死局已触发！正在施法魔法重排字母...</span>
+            <span>{t('deadlockToast')}</span>
           </motion.div>
         )}
       </AnimatePresence>

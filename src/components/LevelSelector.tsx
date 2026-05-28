@@ -10,6 +10,33 @@ import { LevelConfig } from '../types';
 import startPic from '../../pic/start.jpg';
 import alipayPic from '../../pay/alipay.jpg';
 import wechatPic from '../../pay/wechat.png';
+import { useTranslation } from '../utils/i18n';
+
+import flagUsa from '../../country/usa.png';
+import flagChina from '../../country/china.png';
+import flagGermany from '../../country/germany.png';
+import flagJapan from '../../country/japan_.png';
+import flagIndia from '../../country/India.png';
+import flagFrance from '../../country/france.png';
+import flagKorea from '../../country/korea.png';
+import flagSpain from '../../country/Spain.png';
+import flagBrazil from '../../country/brazil.png';
+import flagVietnam from '../../country/vietnam.png';
+
+const FLAG_ORDER = [
+  // First row
+  { code: 'en' as const, flagImg: flagUsa, name: 'English', country: 'USA' },
+  { code: 'zh' as const, flagImg: flagChina, name: '简体中文', country: '中国' },
+  { code: 'de' as const, flagImg: flagGermany, name: 'Deutsch', country: 'Deutschland' },
+  { code: 'ja' as const, flagImg: flagJapan, name: '日本語', country: '日本' },
+  { code: 'hi' as const, flagImg: flagIndia, name: 'हिन्दी', country: 'India' },
+  // Second row
+  { code: 'fr' as const, flagImg: flagFrance, name: 'Français', country: 'France' },
+  { code: 'ko' as const, flagImg: flagKorea, name: '한국어', country: 'Korea' },
+  { code: 'es' as const, flagImg: flagSpain, name: 'Español', country: 'Spain' },
+  { code: 'pt' as const, flagImg: flagBrazil, name: 'Português', country: 'Brazil' },
+  { code: 'vi' as const, flagImg: flagVietnam, name: 'Tiếng Việt', country: 'Vietnam' },
+];
 
 interface LevelSelectorProps {
   levels: LevelConfig[];
@@ -26,6 +53,7 @@ export default function LevelSelector({
   soundEnabled,
   onToggleSound
 }: LevelSelectorProps) {
+  const { t, language, setLanguage } = useTranslation();
   // Hide the level grid by default, clicking '关卡选择' shows it
   const [showGrid, setShowGrid] = useState(false);
   const [sponsorType, setSponsorType] = useState<'alipay' | 'wechat' | null>(null);
@@ -99,6 +127,34 @@ export default function LevelSelector({
           <div className="absolute top-48 right-12 w-12 h-12 rounded-full bg-cyan-400/15 blur-sm animate-bounce duration-5000" />
           <div className="absolute bottom-36 left-16 w-10 h-10 rounded-full bg-yellow-300/10 blur-sm animate-bounce duration-4000" />
 
+          {/* Floated top-left language flag selection panel in 2 rows of 5 */}
+          <div className="absolute top-4 left-4 z-30 flex flex-col gap-1.5 bg-black/50 backdrop-blur-md p-2 rounded-2xl border border-white/15 shadow-xl max-w-[140px]" id="lobby-lang-selector">
+            <div className="grid grid-cols-5 gap-1.5">
+              {FLAG_ORDER.map((lang) => {
+                const isActive = language === lang.code;
+                return (
+                  <button
+                    key={lang.code}
+                    onClick={() => setLanguage(lang.code)}
+                    className={`flex items-center justify-center p-0.5 rounded-lg transition-transform active:scale-90 cursor-pointer select-none ${
+                      isActive 
+                        ? 'bg-pink-500 border border-white shadow-md scale-110' 
+                        : 'hover:bg-white/20'
+                    }`}
+                    title={`${lang.name} - ${lang.country}`}
+                  >
+                    <img
+                      src={lang.flagImg}
+                      alt={lang.country}
+                      className="w-5 h-3.5 object-cover rounded-sm shadow-sm"
+                      referrerPolicy="no-referrer"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Floated top-right audio mute button with cute color */}
           <div className="absolute top-4 right-4 z-30">
             <button
@@ -118,7 +174,7 @@ export default function LevelSelector({
           <div className="relative z-20 mb-3 max-w-xs animate-bounce" style={{ animationDuration: '4s' }}>
             <div className="bg-white text-slate-800 text-xs font-black px-4 py-2 rounded-2xl shadow-xl border-2 border-pink-400 relative flex items-center gap-1.5">
               <Smile className="h-4 w-4 text-pink-500 animate-spin" style={{ animationDuration: '8s' }} />
-              <span>喵~ 跟我一起开启欢乐消除之旅吧！✨</span>
+              <span>{t('mascotBubble')}</span>
               <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 w-0 h-0 border-x-[8px] border-x-transparent border-t-[10px] border-t-white" />
               <div className="absolute bottom-[-13px] left-1/2 -translate-x-1/2 w-0 h-0 border-x-[8px] border-x-transparent border-t-[10px] border-t-pink-400 -z-10" />
             </div>
@@ -127,15 +183,16 @@ export default function LevelSelector({
           {/* Visual Header content */}
           <div className="relative z-25 w-full flex flex-col items-center max-w-sm space-y-5">
             <div className="space-y-2 px-2">
-              <h1 className="flex justify-center items-center gap-1 text-5xl sm:text-6xl md:text-7xl font-sans font-black tracking-tighter select-none py-2 filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]">
-                {['快', '乐', '消', '消', '乐'].map((char, index) => {
+              <h1 className="flex justify-center items-center gap-0.5 text-4xl sm:text-5xl md:text-6xl font-sans font-black tracking-tighter select-none py-2 filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]">
+                {Array.from(t('title')).map((char, index) => {
                   const colors = [
-                    "from-yellow-350 via-amber-400 to-orange-500", // 快
-                    "from-rose-400 via-pink-500 to-pink-600",      // 乐
-                    "from-cyan-300 via-sky-400 to-blue-500",       // 消
-                    "from-lime-300 via-green-400 to-emerald-500",  // 消
-                    "from-fuchsia-400 via-purple-500 to-violet-600"// 乐
+                    "from-yellow-350 via-amber-400 to-orange-500", 
+                    "from-rose-400 via-pink-500 to-pink-600",      
+                    "from-cyan-300 via-sky-400 to-blue-500",       
+                    "from-lime-300 via-green-400 to-emerald-500",  
+                    "from-fuchsia-400 via-purple-500 to-violet-600"
                   ];
+                  const colIdx = index % colors.length;
                   return (
                     <motion.span
                       key={index}
@@ -147,14 +204,14 @@ export default function LevelSelector({
                         delay: index * 0.12,
                         ease: "easeInOut"
                       }}
-                      className="relative inline-block px-1 select-none"
+                      className="relative inline-block px-0.5 select-none"
                     >
                       {/* Bubbly white cartoon border outline simulation */}
                       <span className="absolute inset-x-0 top-[3px] text-zinc-950 font-black text-center filter blur-[0.5px] select-none text-shadow-cute text-shadow-outline">
                         {char}
                       </span>
                       {/* Neon Colorful Body */}
-                      <span className={`relative bg-gradient-to-b ${colors[index]} bg-clip-text text-transparent font-black block drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]`}>
+                      <span className={`relative bg-gradient-to-b ${colors[colIdx]} bg-clip-text text-transparent font-black block drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]`}>
                         {char}
                       </span>
                     </motion.span>
@@ -189,7 +246,7 @@ export default function LevelSelector({
                 id="lobby-primary-play-btn"
               >
                 <Play className="h-4 w-4 fill-current text-slate-900 animate-pulse" />
-                <span className="tracking-wide">闯关冒险</span>
+                <span className="tracking-wide">{t('playBtn')}</span>
               </button>
 
               {/* Sponsor Buttons */}
@@ -230,10 +287,10 @@ export default function LevelSelector({
 
               <div className="space-y-1">
                 <h3 className="text-lg font-black text-white flex items-center justify-center gap-1.5">
-                  <span>{sponsorType === 'alipay' ? '❤️ Alipay ❤️ 赞助支持' : '☕ Wepay ☕ 赞助支持'}</span>
+                  <span>{sponsorType === 'alipay' ? `❤️ Alipay ❤️ ${t('sponsorTitle')}` : `☕ Wepay ☕ ${t('sponsorTitle')}`}</span>
                 </h3>
                 <p className="text-slate-300 text-xs font-semibold leading-relaxed">
-                  感谢您的热心赞助，程序运行需要您的支持！
+                  {t('sponsorSub')}
                 </p>
               </div>
 
@@ -249,7 +306,7 @@ export default function LevelSelector({
 
               {/* Footer tips */}
               <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-850 text-xs text-slate-300 leading-normal">
-                请使用{sponsorType === 'alipay' ? '支付宝' : '微信'}扫一扫赞助。
+                {t('scanTip')}
               </div>
 
               {/* Close Button */}
@@ -257,7 +314,7 @@ export default function LevelSelector({
                 onClick={() => setSponsorType(null)}
                 className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-bold text-xs transition-colors cursor-pointer"
               >
-                关闭窗口
+                {t('closeBtn')}
               </button>
             </div>
           </div>
@@ -279,7 +336,7 @@ export default function LevelSelector({
           id="back-to-lobby-btn"
         >
           <ArrowLeft className="h-3.5 w-3.5 stroke-[2.5]" />
-          <span>返回大厅</span>
+          <span>{t('backToLobby')}</span>
         </button>
 
         {/* Compact Sound Toggle control directly in header */}
@@ -307,7 +364,7 @@ export default function LevelSelector({
         <div className="relative z-10 flex justify-between items-center mb-4 px-1">
           <div className="flex items-center gap-1 bg-white/75 border-2 border-pink-400 shadow-md px-3.5 py-1 rounded-2xl select-none">
             <Trophy className="h-4 w-4 text-amber-500 animate-bounce" />
-            <span className="font-sans font-black text-xs text-slate-700">累计星星</span>
+            <span className="font-sans font-black text-xs text-slate-700">{t('cumulativeStars')}</span>
           </div>
 
           <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-400 px-3.5 py-1 rounded-2xl shadow-md select-none">
@@ -421,14 +478,14 @@ export default function LevelSelector({
           <button
             onClick={() => setShowGrid(false)}
             className="w-12 h-12 rounded-full bg-gradient-to-b from-pink-400 to-rose-600 border-3 border-white hover:brightness-105 active:scale-90 transition-transform shadow-[0_5px_15px_rgba(244,114,182,0.4)] flex items-center justify-center text-white cursor-pointer select-none"
-            title="返回大厅"
+            title={t('backToLobby')}
             id="lobby-exit-circle-btn"
           >
             <ArrowLeft className="h-5 w-5 stroke-[3]" />
           </button>
 
           <span className="text-[11px] font-sans font-black text-slate-500 bg-white/70 px-3.5 py-1.5 rounded-2xl shadow-sm select-none border border-slate-200">
-            🐱 闯关成功自动解锁下一关！
+            {t('autoUnlockTip')}
           </span>
         </div>
 

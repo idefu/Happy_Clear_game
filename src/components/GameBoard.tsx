@@ -587,14 +587,54 @@ export default function GameBoard({
                         cell.isEliminating 
                           ? { scale: 0, opacity: 0, rotate: 45 } 
                           : isHinted
-                          ? { scale: [1, 1.08, 1], rotate: 0 }
-                          : { scale: 1, opacity: 1, rotate: 0 }
+                          ? { scale: [1, 1.08, 1], rotate: 0, y: 0 }
+                          : cell.special === 'ROW_BLASTER'
+                          ? { rotate: [-6, 6, -6], scale: 1, opacity: 1, y: 0 }
+                          : cell.special === 'COL_BLASTER'
+                          ? { y: [-3, 3, -3], rotate: 0, scale: 1, opacity: 1 }
+                          : cell.special === 'HYPER_EXPLODER'
+                          ? {
+                              scale: 1,
+                              opacity: 1,
+                              rotate: 0,
+                              y: 0,
+                              borderColor: ["rgba(245, 158, 11, 0.75)", "rgba(236, 72, 153, 0.75)", "rgba(59, 130, 246, 0.75)", "rgba(16, 185, 129, 0.75)", "rgba(245, 158, 11, 0.75)"],
+                              boxShadow: [
+                                "0 0 12px rgba(245, 158, 11, 0.65)",
+                                "0 0 20px rgba(236, 72, 153, 0.75)",
+                                "0 0 12px rgba(59, 130, 246, 0.65)",
+                                "0 0 20px rgba(16, 185, 129, 0.75)",
+                                "0 0 12px rgba(245, 158, 11, 0.65)"
+                              ]
+                            }
+                          : cell.special === 'BOMB'
+                          ? {
+                              scale: 1,
+                              opacity: 1,
+                              rotate: 0,
+                              y: 0,
+                              borderColor: ["rgba(239, 68, 68, 0.75)", "rgba(248, 113, 113, 0.75)", "rgba(185, 28, 28, 0.75)", "rgba(239, 68, 68, 0.75)"],
+                              boxShadow: [
+                                "0 0 12px rgba(239, 68, 68, 0.65)",
+                                "0 0 22px rgba(239, 68, 68, 0.95)",
+                                "0 0 12px rgba(239, 68, 68, 0.65)"
+                              ]
+                            }
+                          : { scale: 1, opacity: 1, rotate: 0, y: 0 }
                       }
                       transition={
                         cell.isEliminating
                           ? undefined
                           : isHinted
                           ? { repeat: Infinity, duration: 1.4, ease: "easeInOut" }
+                          : (!cell.isEliminating && !isHinted && cell.special === 'ROW_BLASTER')
+                          ? { repeat: Infinity, duration: 1.8, ease: "easeInOut" }
+                          : (!cell.isEliminating && !isHinted && cell.special === 'COL_BLASTER')
+                          ? { repeat: Infinity, duration: 1.8, ease: "easeInOut" }
+                          : (!cell.isEliminating && !isHinted && cell.special === 'HYPER_EXPLODER')
+                          ? { repeat: Infinity, duration: 2.5, ease: "linear" }
+                          : (!cell.isEliminating && !isHinted && cell.special === 'BOMB')
+                          ? { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
                           : cell.isNew 
                           ? { type: 'spring', stiffness: 450, damping: 28 }
                           : { type: 'spring', stiffness: 500, damping: 30 }

@@ -9,6 +9,7 @@ import { motion } from 'motion/react';
 import { LevelConfig } from '../types';
 import alipayPic from '../../pay/alipay.jpg';
 import wechatPic from '../../pay/wechat.png';
+import { useTranslation } from '../utils/i18n';
 
 interface WinLoseModalProps {
   isWon: boolean;
@@ -31,6 +32,7 @@ export default function WinLoseModal({
   onNextLevel,
   onChooseLevel
 }: WinLoseModalProps) {
+  const { t } = useTranslation();
   const [sponsorType, setSponsorType] = useState<'alipay' | 'wechat' | null>(null);
   const movesBonus = isWon ? movesRemaining * 200 : 0;
   const grandTotal = score + movesBonus;
@@ -53,7 +55,7 @@ export default function WinLoseModal({
             </div>
 
             <div className="space-y-1">
-              <h2 className="text-xl font-black text-white">通关成功</h2>
+              <h2 className="text-xl font-black text-white">{t('winStateTitle')}</h2>
               <p className="text-[10px] font-mono text-slate-400 font-semibold uppercase tracking-wider">
                 LV {level.id}
               </p>
@@ -62,26 +64,26 @@ export default function WinLoseModal({
             {/* Score HUD breakdown */}
             <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800/80 space-y-1.5 text-xs font-mono">
               <div className="flex justify-between items-center text-slate-400">
-                <span>分数</span>
+                <span>{t('scoreLabel')}</span>
                 <span className="text-white font-bold">{score}</span>
               </div>
 
               {movesRemaining > 0 && (
                 <div className="flex justify-between items-center text-slate-400">
-                  <span className="text-cyan-400">奖励</span>
+                  <span className="text-cyan-400">{t('bonusLabel')}</span>
                   <span className="text-cyan-400 font-bold">+{movesBonus}</span>
                 </div>
               )}
 
               <div className="flex justify-between items-center pt-1.5 border-t border-slate-800/80">
-                <span className="text-slate-200">总计</span>
+                <span className="text-slate-200">{t('grandTotalLabel')}</span>
                 <span className="text-yellow-400 font-black text-sm">{grandTotal}</span>
               </div>
 
               {isNewHighScore && (
                 <div className="flex items-center justify-center gap-1 text-[9px] text-amber-500 font-bold uppercase tracking-wider border-t border-slate-800/80 pt-1.5">
                   <Star className="h-3 w-3 fill-current" />
-                  <span>New Record</span>
+                  <span>{t('newRecordLabel')}</span>
                 </div>
               )}
             </div>
@@ -94,7 +96,7 @@ export default function WinLoseModal({
                   className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-2.5 text-xs font-bold text-white transition-all shadow cursor-pointer active:scale-95"
                   id="result-next-level-btn"
                 >
-                  <span>下一关</span>
+                  <span>{t('nextLevelBtn')}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               )}
@@ -106,7 +108,7 @@ export default function WinLoseModal({
                   id="result-replay-win-btn"
                 >
                   <RefreshCcw className="h-3 w-3" />
-                  <span>重试</span>
+                  <span>{t('replayBtn')}</span>
                 </button>
                 <button
                   onClick={onChooseLevel}
@@ -114,7 +116,7 @@ export default function WinLoseModal({
                   id="result-to-menu-win-btn"
                 >
                   <Home className="h-3 w-3" />
-                  <span>大厅</span>
+                  <span>{t('lobbyBtn')}</span>
                 </button>
               </div>
 
@@ -122,7 +124,7 @@ export default function WinLoseModal({
               <div className="relative py-1 flex items-center justify-center pt-2 select-none">
                 <div className="absolute inset-x-4 h-px bg-slate-800" />
                 <span className="relative px-2.5 bg-slate-900 text-[10px] font-black text-pink-400 tracking-wider">
-                  💝 赞助支持本程序
+                  💝 {t('sponsorTitle')}
                 </span>
               </div>
 
@@ -154,7 +156,7 @@ export default function WinLoseModal({
             </div>
 
             <div className="space-y-1">
-              <h2 className="text-xl font-black text-white">挑战失败</h2>
+              <h2 className="text-xl font-black text-white">{t('loseStateTitle')}</h2>
               <p className="text-[10px] font-mono text-slate-400 font-semibold uppercase tracking-wider">
                 LV {level.id}
               </p>
@@ -162,11 +164,11 @@ export default function WinLoseModal({
 
             <div className="rounded-xl bg-slate-950/60 p-3 border border-slate-800/80 space-y-1.5 text-xs font-mono">
               <div className="flex justify-between items-center text-slate-400">
-                <span>分数</span>
+                <span>{t('scoreLabel')}</span>
                 <span className="text-white font-bold">{score}</span>
               </div>
               <div className="flex justify-between items-center text-slate-400">
-                <span>目标</span>
+                <span>{t('challengeStart')}</span>
                 <span className="text-indigo-400 font-bold">{level.scoreGoal}</span>
               </div>
             </div>
@@ -179,7 +181,7 @@ export default function WinLoseModal({
                 id="result-retry-lose-btn"
               >
                 <RefreshCcw className="h-3.5 w-3.5" />
-                <span>重试</span>
+                <span>{t('replayBtn')}</span>
               </button>
 
               <button
@@ -188,14 +190,14 @@ export default function WinLoseModal({
                 id="result-to-menu-lose-btn"
               >
                 <Home className="h-3.5 w-3.5" />
-                <span>大厅</span>
+                <span>{t('lobbyBtn')}</span>
               </button>
 
               {/* Sponsor row */}
               <div className="relative py-1 flex items-center justify-center pt-2 select-none">
                 <div className="absolute inset-x-4 h-px bg-slate-800" />
-                <span className="relative px-2.5 bg-slate-900 text-[10px] font-black text-pink-404 tracking-wider">
-                  💝 赞助支持本程序
+                <span className="relative px-2.5 bg-slate-900 text-[10px] font-black text-pink-400 tracking-wider">
+                  💝 {t('sponsorTitle')}
                 </span>
               </div>
 
@@ -236,10 +238,10 @@ export default function WinLoseModal({
 
             <div className="space-y-1">
               <h3 className="text-base font-black text-white flex items-center justify-center gap-1.5">
-                <span>{sponsorType === 'alipay' ? '❤️ Alipay ❤️ 赞助支持' : '☕ Wepay ☕ 赞助支持'}</span>
+                <span>{sponsorType === 'alipay' ? `❤️ Alipay ❤️ ${t('sponsorTitle')}` : `☕ Wepay ☕ ${t('sponsorTitle')}`}</span>
               </h3>
               <p className="text-slate-300 text-[11px] font-semibold leading-relaxed">
-                感谢您的每一份善意，您的赞助是程序走得更好的动力！💖
+                {t('winModalSponsorSub')}
               </p>
             </div>
 
@@ -255,7 +257,7 @@ export default function WinLoseModal({
 
             {/* Footer tips */}
             <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-850 text-[10px] text-slate-300 leading-normal">
-              请使用{sponsorType === 'alipay' ? '支付宝' : '微信'}扫一扫赞助。
+              {t('scanTip')}
             </div>
 
             {/* Close Button */}
@@ -263,7 +265,7 @@ export default function WinLoseModal({
               onClick={() => setSponsorType(null)}
               className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-bold text-xs transition-colors cursor-pointer"
             >
-              关闭窗口
+              {t('closeBtn')}
             </button>
           </div>
         </div>
