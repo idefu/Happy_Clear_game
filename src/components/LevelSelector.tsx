@@ -128,15 +128,15 @@ export default function LevelSelector({
           <div className="absolute bottom-36 left-16 w-10 h-10 rounded-full bg-yellow-300/10 blur-sm animate-bounce duration-4000" />
 
           {/* Floated top-left language flag selection panel in 2 rows of 5 */}
-          <div className="absolute top-4 left-4 z-30 flex flex-col gap-2 bg-black/60 backdrop-blur-md p-2.5 rounded-2xl border border-white/25 shadow-xl" id="lobby-lang-selector">
-            <div className="grid grid-cols-5 gap-2">
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-30 flex flex-col gap-1 sm:gap-2 bg-black/60 backdrop-blur-md p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border border-white/25 shadow-xl" id="lobby-lang-selector">
+            <div className="grid grid-cols-5 gap-1 sm:gap-2">
               {FLAG_ORDER.map((lang) => {
                 const isActive = language === lang.code;
                 return (
                   <button
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
-                    className={`flex items-center justify-center p-1 rounded-lg transition-transform active:scale-90 cursor-pointer select-none ${
+                    className={`flex items-center justify-center p-0.5 sm:p-1 rounded-md sm:rounded-lg transition-transform active:scale-90 cursor-pointer select-none ${
                       isActive 
                         ? 'bg-pink-500 border border-white shadow-md scale-110' 
                         : 'hover:bg-white/20'
@@ -146,7 +146,7 @@ export default function LevelSelector({
                     <img
                       src={lang.flagImg}
                       alt={lang.country}
-                      className="w-8 h-5.5 object-cover rounded-sm shadow-sm"
+                      className="w-5.5 h-4 sm:w-8 sm:h-5.5 object-cover rounded-sm shadow-sm"
                       referrerPolicy="no-referrer"
                     />
                   </button>
