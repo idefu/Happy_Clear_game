@@ -346,18 +346,19 @@ export const LEVELS: LevelConfig[] = [
     description: "A gorgeous X-shaped frozen blockade dividing the board! Shattering the diagonal shield causes massive cross-collapses!",
     chineseDescription: "庞大的X对角光环冰墙，把棋盘整体切碎为四份！粉碎冰晶以激活连通的对角落差！",
     layout: [
-      [2, 1, 1, 1, 2],
-      [1, 2, 1, 2, 1],
-      [1, 1, 2, 1, 1],
-      [1, 2, 1, 2, 1],
-      [2, 1, 1, 1, 2]
+      [2, 1, 1, 1, 1, 2],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 2, 2, 1, 1],
+      [1, 1, 2, 2, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [2, 1, 1, 1, 1, 2]
     ],
     scoreGoal: 12000,
     movesLimit: 24,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.20,
     specialGoals: {
-      iceCount: 6,
+      iceCount: 12,
       totalEliminations: 55,
       maxCombo: 3
     }
@@ -369,17 +370,19 @@ export const LEVELS: LevelConfig[] = [
     description: "Symmetrical pocket corridors linked by narrow gravity gates. Chain sideways blasters to swap matter instantly!",
     chineseDescription: "由两端跃迁而来的平行通道。必须充分制造横向极光爆破或者炸弹去清理死角！",
     layout: [
-      [1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1],
-      [1, 0, 1, 0, 1],
-      [1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 0, 1, 1, 0, 1],
+      [1, 0, 1, 1, 0, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
     scoreGoal: 13000,
     movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.24,
     specialGoals: {
+      iceCount: 4,
       letter: { 'C': 10, 'D': 10 },
       totalEliminations: 55,
       maxCombo: 3
@@ -392,18 +395,19 @@ export const LEVELS: LevelConfig[] = [
     description: "Three thin vertical channels cascade into a wide base pool. Liquid layouts deliver superb dropping cascade feelings!",
     chineseDescription: "黄金三叉戟布局。三道极深的垂直落差使碎料能产生极高能的连续重力撞击！",
     layout: [
-      [1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1],
-      [1, 1, 1, 1, 1],
-      [1, 2, 2, 2, 1],
-      [1, 1, 1, 1, 1]
+      [1, 0, 1, 1, 0, 1],
+      [1, 0, 1, 1, 0, 1],
+      [1, 0, 1, 1, 0, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 2, 2, 2, 2, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
     scoreGoal: 14000,
     movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.18,
     specialGoals: {
-      iceCount: 3,
+      iceCount: 4,
       totalEliminations: 55,
       maxCombo: 3
     }
@@ -415,18 +419,19 @@ export const LEVELS: LevelConfig[] = [
     description: "Symmetric nested infinity layout tracking infinite flow. High strategic swapping maximizes incredible specials combinations!",
     chineseDescription: "扭曲的莫比乌斯星轨。奇妙的多维重疊空位，考验您在复杂几何环路中的合击逻辑！",
     layout: [
-      [0, 1, 1, 1, 0],
-      [1, 1, 2, 1, 1],
-      [1, 2, 0, 2, 1],
-      [1, 1, 2, 1, 1],
-      [0, 1, 1, 1, 0]
+      [0, 1, 1, 1, 1, 0],
+      [1, 1, 2, 2, 1, 1],
+      [1, 2, 0, 0, 2, 1],
+      [1, 2, 0, 0, 2, 1],
+      [1, 1, 2, 2, 1, 1],
+      [0, 1, 1, 1, 1, 0]
     ],
     scoreGoal: 15000,
     movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.22,
     specialGoals: {
-      iceCount: 4,
+      iceCount: 8,
       totalEliminations: 55,
       maxCombo: 3
     }
@@ -510,18 +515,19 @@ export const LEVELS: LevelConfig[] = [
     description: "Winding corridors filled with slippery paths and icy traps.",
     chineseDescription: "蜿蜒的甜香迷宫。四角与圆心的坚冰极具阻碍性，唯有激发神奇连击方能突围！",
     layout: [
-      [2, 1, 0, 1, 2],
-      [1, 1, 1, 1, 1],
-      [0, 1, 2, 1, 0],
-      [1, 1, 1, 1, 1],
-      [2, 1, 0, 1, 2]
+      [2, 1, 0, 0, 1, 2],
+      [1, 1, 1, 1, 1, 1],
+      [0, 1, 2, 2, 1, 0],
+      [0, 1, 2, 2, 1, 0],
+      [1, 1, 1, 1, 1, 1],
+      [2, 1, 0, 0, 1, 2]
     ],
     scoreGoal: 18000,
     movesLimit: 20,
     allowedLetters: ['B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.2,
     specialGoals: {
-      iceCount: 5,
+      iceCount: 8,
       totalEliminations: 65,
       maxCombo: 4
     }
@@ -580,18 +586,19 @@ export const LEVELS: LevelConfig[] = [
     description: "An ice-locked fortress of sweetness. Melt down the core to capture the high stars.",
     chineseDescription: "坚不可摧的冰淇淋城堡！中心十字密布坚硬的冰层，您需要以包围之势粉碎所有障碍！",
     layout: [
-      [1, 1, 2, 1, 1],
-      [1, 1, 2, 1, 1],
-      [2, 2, 2, 2, 2],
-      [1, 1, 2, 1, 1],
-      [1, 1, 2, 1, 1]
+      [1, 1, 2, 2, 1, 1],
+      [1, 1, 2, 2, 1, 1],
+      [2, 2, 1, 1, 2, 2],
+      [2, 2, 1, 1, 2, 2],
+      [1, 1, 2, 2, 1, 1],
+      [1, 1, 2, 2, 1, 1]
     ],
     scoreGoal: 25000,
     movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.25,
     specialGoals: {
-      iceCount: 9,
+      iceCount: 12,
       totalEliminations: 80,
       letter: { 'D': 15, 'E': 15 }
     }
@@ -627,18 +634,19 @@ export const LEVELS: LevelConfig[] = [
     description: "A revolving circle of icy tiles. Match on the perimeter or break the cozy core.",
     chineseDescription: "欢快转动的棒棒糖木马！周围点缀着一圈透亮的星级冰壁，伴随着悦耳音乐爆破全场吧！",
     layout: [
-      [2, 1, 1, 1, 2],
-      [1, 0, 1, 0, 1],
-      [1, 1, 2, 1, 1],
-      [1, 0, 1, 0, 1],
-      [2, 1, 1, 1, 2]
+      [2, 1, 1, 1, 1, 2],
+      [1, 0, 1, 1, 0, 1],
+      [1, 1, 2, 2, 1, 1],
+      [1, 1, 2, 2, 1, 1],
+      [1, 0, 1, 1, 0, 1],
+      [2, 1, 1, 1, 1, 2]
     ],
     scoreGoal: 26050,
     movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.2,
     specialGoals: {
-      iceCount: 5,
+      iceCount: 8,
       totalEliminations: 75,
       letter: { 'A': 20 }
     }
