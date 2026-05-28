@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Trophy, RefreshCcw, ArrowRight, Home, AlertCircle, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { LevelConfig } from '../types';
+import alipayPic from '../../pay/alipay.jpg';
+import wechatPic from '../../pay/wechat.png';
 
 interface WinLoseModalProps {
   isWon: boolean;
@@ -29,6 +31,7 @@ export default function WinLoseModal({
   onNextLevel,
   onChooseLevel
 }: WinLoseModalProps) {
+  const [sponsorType, setSponsorType] = useState<'alipay' | 'wechat' | null>(null);
   const movesBonus = isWon ? movesRemaining * 200 : 0;
   const grandTotal = score + movesBonus;
 
@@ -114,6 +117,31 @@ export default function WinLoseModal({
                   <span>大厅</span>
                 </button>
               </div>
+
+              {/* Sponsor row */}
+              <div className="relative py-1 flex items-center justify-center pt-2 select-none">
+                <div className="absolute inset-x-4 h-px bg-slate-800" />
+                <span className="relative px-2.5 bg-slate-900 text-[10px] font-black text-pink-400 tracking-wider">
+                  💝 赞助支持本程序
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <button
+                  onClick={() => setSponsorType('alipay')}
+                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-550 text-white font-black text-sm transition-all active:scale-95 cursor-pointer border border-blue-400/20"
+                  id="win-sponsor-alipay"
+                >
+                  <span>❤️ Alipay ❤️</span>
+                </button>
+                <button
+                  onClick={() => setSponsorType('wechat')}
+                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-555 text-white font-black text-sm transition-all active:scale-95 cursor-pointer border border-emerald-400/20"
+                  id="win-sponsor-wechat"
+                >
+                  <span>☕ Wepay ☕</span>
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -162,10 +190,85 @@ export default function WinLoseModal({
                 <Home className="h-3.5 w-3.5" />
                 <span>大厅</span>
               </button>
+
+              {/* Sponsor row */}
+              <div className="relative py-1 flex items-center justify-center pt-2 select-none">
+                <div className="absolute inset-x-4 h-px bg-slate-800" />
+                <span className="relative px-2.5 bg-slate-900 text-[10px] font-black text-pink-404 tracking-wider">
+                  💝 赞助支持本程序
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <button
+                  onClick={() => setSponsorType('alipay')}
+                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-550 text-white font-black text-sm transition-all active:scale-95 cursor-pointer border border-blue-400/20"
+                  id="lose-sponsor-alipay"
+                >
+                  <span>❤️ Alipay ❤️</span>
+                </button>
+                <button
+                  onClick={() => setSponsorType('wechat')}
+                  className="flex items-center justify-center gap-1.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-555 text-white font-black text-sm transition-all active:scale-95 cursor-pointer border border-emerald-400/20"
+                  id="lose-sponsor-wechat"
+                >
+                  <span>☕ Wepay ☕</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
       </motion.div>
+
+      {/* Sponsorship QR Code Modal overlay */}
+      {sponsorType && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={() => setSponsorType(null)}
+        >
+          <div 
+            className="w-full max-w-xs bg-slate-900 border-4 border-pink-400 rounded-3xl p-6 text-center shadow-2xl space-y-4 relative overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            id="settlement-sponsor-modal"
+          >
+            {/* Top decorative gradient line */}
+            <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${sponsorType === 'alipay' ? 'from-blue-400 to-indigo-500' : 'from-emerald-400 to-teal-500'}`} />
+
+            <div className="space-y-1">
+              <h3 className="text-base font-black text-white flex items-center justify-center gap-1.5">
+                <span>{sponsorType === 'alipay' ? '❤️ Alipay ❤️ 赞助支持' : '☕ Wepay ☕ 赞助支持'}</span>
+              </h3>
+              <p className="text-slate-300 text-[11px] font-semibold leading-relaxed">
+                感谢您的每一份善意，您的赞助是程序走得更好的动力！💖
+              </p>
+            </div>
+
+            {/* QR Code Container */}
+            <div className="mx-auto rounded-xl bg-white p-3 aspect-square max-w-[170px] flex items-center justify-center shadow-inner border border-slate-700/50">
+              <img 
+                src={sponsorType === 'alipay' ? alipayPic : wechatPic} 
+                className="w-full h-full object-contain"
+                alt={`${sponsorType === 'alipay' ? 'Alipay' : 'Wepay'}赞助二维码`}
+                referrerPolicy="no-referrer"
+              />
+            </div>
+
+            {/* Footer tips */}
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-850 text-[10px] text-slate-300 leading-normal">
+              请使用{sponsorType === 'alipay' ? '支付宝' : '微信'}扫一扫赞助。
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setSponsorType(null)}
+              className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-bold text-xs transition-colors cursor-pointer"
+            >
+              关闭窗口
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

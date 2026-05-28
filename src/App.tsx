@@ -317,8 +317,8 @@ export default function App() {
       } else {
         hyperSweepLetter = t1.special === 'HYPER_EXPLODER' ? t2.letter : t1.letter;
       }
-      if (t1.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r1, c: c1 });
-      if (t2.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r2, c: c2 });
+      if (t1.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r2, c: c2 });
+      if (t2.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r1, c: c1 });
     }
 
     while (matchGroups.length > 0 || dualSpecialActive || isHyperSweepActive || checkHasAnyActiveMatches(workingBoard)) {

@@ -198,7 +198,7 @@ export const LEVELS: LevelConfig[] = [
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.18,
     specialGoals: {
-      iceCount: 4,
+      iceCount: 3,
       totalEliminations: 40,
       maxCombo: 3
     }
@@ -240,7 +240,7 @@ export const LEVELS: LevelConfig[] = [
     ],
     scoreGoal: 8000,
     movesLimit: 24,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.18,
     specialGoals: {
       iceCount: 14,
@@ -331,7 +331,7 @@ export const LEVELS: LevelConfig[] = [
     ],
     scoreGoal: 11000,
     movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.20,
     specialGoals: {
       iceCount: 6,
@@ -354,7 +354,7 @@ export const LEVELS: LevelConfig[] = [
     ],
     scoreGoal: 12000,
     movesLimit: 24,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.20,
     specialGoals: {
       iceCount: 6,
@@ -400,7 +400,7 @@ export const LEVELS: LevelConfig[] = [
     ],
     scoreGoal: 14000,
     movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.18,
     specialGoals: {
       iceCount: 3,
@@ -423,7 +423,7 @@ export const LEVELS: LevelConfig[] = [
     ],
     scoreGoal: 15000,
     movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.22,
     specialGoals: {
       iceCount: 4,
@@ -447,12 +447,250 @@ export const LEVELS: LevelConfig[] = [
     ],
     scoreGoal: 20000,
     movesLimit: 26,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.22,
     specialGoals: {
       iceCount: 6,
       totalEliminations: 70,
       maxCombo: 4
+    }
+  },
+  {
+    id: 21,
+    name: "Gummy Bear Gardens",
+    chineseName: "软糖小镇",
+    description: "Fruity rows of candy blockages. Clear the icy garden to release sweet gummy specials!",
+    chineseDescription: "充满甜蜜气息的水果软糖小径。打破坚硬的霜层，让可爱的水果爆破美味蔓延！",
+    layout: [
+      [0, 1, 1, 1, 1, 0],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [0, 1, 1, 1, 1, 0]
+    ],
+    scoreGoal: 22000,
+    movesLimit: 25,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.22,
+    specialGoals: {
+      iceCount: 4,
+      totalEliminations: 75,
+      maxCombo: 3
+    }
+  },
+  {
+    id: 22,
+    name: "Choco Mountain Peak",
+    chineseName: "巧克力之巅",
+    description: "High altitude chocolaty fun. Double-column frostings protect the precious high-sugar matches.",
+    chineseDescription: "高空大冒险！险峻的双翼冰霜夹道，需要在有限空间中寻找合成特殊棋子的绝妙时机！",
+    layout: [
+      [1, 2, 1, 2, 1],
+      [1, 1, 1, 1, 1],
+      [1, 2, 1, 2, 1],
+      [1, 1, 1, 1, 1],
+      [1, 2, 1, 2, 1],
+      [1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 24000,
+    movesLimit: 24,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.25,
+    specialGoals: {
+      iceCount: 6,
+      totalEliminations: 80,
+      letter: { 'A': 15, 'B': 15 }
+    }
+  },
+  {
+    id: 23,
+    name: "Licorice Maze",
+    chineseName: "甘草甜迷宫",
+    description: "Winding corridors filled with slippery paths and icy traps.",
+    chineseDescription: "蜿蜒的甜香迷宫。四角与圆心的坚冰极具阻碍性，唯有激发神奇连击方能突围！",
+    layout: [
+      [2, 1, 0, 1, 2],
+      [1, 1, 1, 1, 1],
+      [0, 1, 2, 1, 0],
+      [1, 1, 1, 1, 1],
+      [2, 1, 0, 1, 2]
+    ],
+    scoreGoal: 18000,
+    movesLimit: 20,
+    allowedLetters: ['B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.2,
+    specialGoals: {
+      iceCount: 5,
+      totalEliminations: 65,
+      maxCombo: 4
+    }
+  },
+  {
+    id: 24,
+    name: "Cotton Candy Clouds",
+    chineseName: "棉花糖浮云",
+    description: "Light fluffy challenge. Keep matching continuously to score high in the skies!",
+    chineseDescription: "松软微甜的粉红浮云。大面积开放式棋盘，为您合成豪华黑洞提供得天独厚的消除舞台！",
+    layout: [
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 30000,
+    movesLimit: 28,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.3,
+    specialGoals: {
+      totalEliminations: 95,
+      maxCombo: 5
+    }
+  },
+  {
+    id: 25,
+    name: "Marshmallow Bridges",
+    chineseName: "棉花糖双桥",
+    description: "Bridges of candies separated by water channels. Swap smartly across the divides.",
+    chineseDescription: "由香甜棉花糖连接的双子桥梁，中间是甜浆溪流，考验您跨越阻隔的非凡手艺！",
+    layout: [
+      [1, 1, 0, 1, 1],
+      [1, 2, 0, 2, 1],
+      [1, 1, 0, 1, 1],
+      [1, 2, 0, 2, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 23000,
+    movesLimit: 23,
+    allowedLetters: ['A', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.18,
+    specialGoals: {
+      iceCount: 4,
+      totalEliminations: 70,
+      letter: { 'C': 18 }
+    }
+  },
+  {
+    id: 26,
+    name: "Ice Cream Citadel",
+    chineseName: "冰淇淋城堡",
+    description: "An ice-locked fortress of sweetness. Melt down the core to capture the high stars.",
+    chineseDescription: "坚不可摧的冰淇淋城堡！中心十字密布坚硬的冰层，您需要以包围之势粉碎所有障碍！",
+    layout: [
+      [1, 1, 2, 1, 1],
+      [1, 1, 2, 1, 1],
+      [2, 2, 2, 2, 2],
+      [1, 1, 2, 1, 1],
+      [1, 1, 2, 1, 1]
+    ],
+    scoreGoal: 25000,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.25,
+    specialGoals: {
+      iceCount: 9,
+      totalEliminations: 80,
+      letter: { 'D': 15, 'E': 15 }
+    }
+  },
+  {
+    id: 27,
+    name: "Soda Bubble Volcano",
+    chineseName: "苏打气泡火山",
+    description: "Volcanic chambers storing energetic carbonated candies. High drop speeds!",
+    chineseDescription: "咕嘟咕嘟冒泡的汽水火山。异形收窄的瓶口结构极易引发层层相叠的梦幻大连锁！",
+    layout: [
+      [0, 1, 1, 1, 0],
+      [0, 1, 2, 1, 0],
+      [1, 1, 2, 1, 1],
+      [1, 2, 1, 2, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 27000,
+    movesLimit: 25,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.28,
+    specialGoals: {
+      iceCount: 4,
+      totalEliminations: 85,
+      maxCombo: 4
+    }
+  },
+  {
+    id: 28,
+    name: "Lollipop Carousel",
+    chineseName: "棒棒糖旋转木马",
+    description: "A revolving circle of icy tiles. Match on the perimeter or break the cozy core.",
+    chineseDescription: "欢快转动的棒棒糖木马！周围点缀着一圈透亮的星级冰壁，伴随着悦耳音乐爆破全场吧！",
+    layout: [
+      [2, 1, 1, 1, 2],
+      [1, 0, 1, 0, 1],
+      [1, 1, 2, 1, 1],
+      [1, 0, 1, 0, 1],
+      [2, 1, 1, 1, 2]
+    ],
+    scoreGoal: 26050,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.2,
+    specialGoals: {
+      iceCount: 5,
+      totalEliminations: 75,
+      letter: { 'A': 20 }
+    }
+  },
+  {
+    id: 29,
+    name: "Caramel Galaxy",
+    chineseName: "焦糖星云",
+    description: "A majestic cluster of rich coordinates resembling swirling starlight.",
+    chineseDescription: "深邃繁星汇聚的焦糖旋涡。巧妙阻挡的无重力悬空孔道，在浩瀚糖流里畅快爆破！",
+    layout: [
+      [1, 1, 1, 1, 1, 1],
+      [1, 0, 2, 2, 0, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 0, 2, 2, 0, 1],
+      [1, 1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 32000,
+    movesLimit: 27,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.3,
+    specialGoals: {
+      iceCount: 8,
+      totalEliminations: 100,
+      maxCombo: 4
+    }
+  },
+  {
+    id: 30,
+    name: "Sweetness Grand Finale",
+    chineseName: "糖果圣杯终章",
+    description: "The ultimate 7x7 map with supreme combination mechanics and extreme goals.",
+    chineseDescription: "七彩斑斓的终极甜蜜交响乐！宏伟的7x7圣杯法阵中，冰霜满布，请释放您最顶尖的消除智慧！",
+    layout: [
+      [1, 1, 2, 1, 2, 1, 1],
+      [1, 2, 1, 1, 1, 2, 1],
+      [2, 1, 1, 2, 1, 1, 2],
+      [1, 1, 2, 0, 2, 1, 1],
+      [2, 1, 1, 2, 1, 1, 2],
+      [1, 2, 1, 1, 1, 2, 1],
+      [1, 1, 2, 1, 2, 1, 1]
+    ],
+    scoreGoal: 45000,
+    movesLimit: 32,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.33,
+    specialGoals: {
+      iceCount: 16,
+      totalEliminations: 120,
+      maxCombo: 5,
+      letter: { 'A': 25, 'B': 25 }
     }
   }
 ];
