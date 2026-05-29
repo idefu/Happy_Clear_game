@@ -40,11 +40,13 @@ interface ScoreBoardProps {
     stoneCleared: number;
   };
   isIceHighlighted?: boolean;
+  isVinedHighlighted?: boolean;
   soundEnabled: boolean;
   onToggleSound: () => void;
   onResetLevel: () => void;
   onBackToMenu: () => void;
   onIceGoalClick?: () => void;
+  onVinedGoalClick?: () => void;
   children?: React.ReactNode;
 }
 
@@ -54,11 +56,13 @@ export default function ScoreBoard({
   movesRemaining,
   goalsProgress,
   isIceHighlighted,
+  isVinedHighlighted,
   soundEnabled,
   onToggleSound,
   onResetLevel,
   onBackToMenu,
   onIceGoalClick,
+  onVinedGoalClick,
   children
 }: ScoreBoardProps) {
   const { t, language } = useTranslation();
@@ -146,12 +150,21 @@ export default function ScoreBoard({
 
               {/* Vines target */}
               {level.specialGoals?.vinedCount !== undefined && (
-                <div className="flex items-center justify-between w-full p-2.5 rounded-2xl border-2 border-emerald-500/20 bg-slate-950/70">
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  onClick={onVinedGoalClick}
+                  className={`flex items-center justify-between w-full p-2.5 rounded-2xl border-2 cursor-pointer select-none transition-all ${
+                    isVinedHighlighted 
+                      ? 'bg-emerald-400/20 border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]' 
+                      : 'bg-slate-950/70 border-emerald-500/20 hover:border-emerald-400/50'
+                  }`}
+                  id="desktop-vined-goal"
+                >
                   <span className="text-[13px] font-black text-emerald-300">🌿 {language === 'zh' ? '解封藤蔓' : 'Vines'}</span>
                   <span className={`font-sans font-black text-sm lg:text-base ${goalsProgress.vinedCleared >= level.specialGoals.vinedCount ? 'text-emerald-400' : 'text-emerald-300'}`}>
                     {goalsProgress.vinedCleared}/{level.specialGoals.vinedCount}
                   </span>
-                </div>
+                </motion.div>
               )}
 
               {/* Stones target */}
@@ -390,7 +403,14 @@ export default function ScoreBoard({
 
               {/* Vines target */}
               {level.specialGoals?.vinedCount !== undefined && (
-                <div className="flex items-center justify-between px-1.5 py-0.5 rounded-lg border-2 border-white/5 bg-slate-950/65">
+                <div 
+                  onClick={onVinedGoalClick}
+                  className={`flex items-center justify-between px-1.5 py-0.5 rounded-lg border-2 cursor-pointer select-none transition-all ${
+                    isVinedHighlighted 
+                      ? 'bg-emerald-505/20 border-emerald-400 text-emerald-300' 
+                      : 'bg-slate-950/65 border-white/5'
+                  }`}
+                >
                   <span className="text-[9px] font-bold text-slate-400">🌿 {language === 'zh' ? '藤蔓' : 'Vines'}</span>
                   <span className="font-sans font-black text-xs text-emerald-400">
                     {goalsProgress.vinedCleared}/{level.specialGoals.vinedCount}

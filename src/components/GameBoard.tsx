@@ -46,6 +46,7 @@ interface GameBoardProps {
   soundEnabled: boolean;
   onIceClicked?: () => void;
   isIceHighlightActive: boolean;
+  isVinedHighlightActive: boolean;
 }
 
 const letterColors: { [key in Letter]: string } = {
@@ -78,7 +79,8 @@ export default function GameBoard({
   deletedPoints,
   soundEnabled,
   onIceClicked,
-  isIceHighlightActive
+  isIceHighlightActive,
+  isVinedHighlightActive
 }: GameBoardProps) {
   const rows = board.length;
   const cols = board[0]?.length || 0;
@@ -353,7 +355,7 @@ export default function GameBoard({
       }
       
       const movingTile = isP1 ? t2 : t1;
-      if (!movingTile || movingTile.isLocked || movingTile.isVined || movingTile.isStone) {
+      if (!movingTile || movingTile.isLocked || movingTile.isVined || movingTile.isStone || movingTile.special === 'HYPER_EXPLODER') {
         sound.playBounce();
         return;
       }
@@ -661,6 +663,7 @@ export default function GameBoard({
                   {/* Render Tile content */}
                   {cell && (
                     <motion.div
+                      key={cell.id}
                       initial={cell.isNew ? { scale: 0, opacity: 0 } : false}
                       animate={
                         cell.isEliminating 
@@ -764,7 +767,11 @@ export default function GameBoard({
 
                       {/* Vines / Leaves Overlay */}
                       {cell.isVined && (
-                        <div className="absolute inset-0 rounded-xl bg-emerald-950/25 border-2 border-emerald-500 shadow-[inset_0_0_8px_rgba(16,185,129,0.6)] z-10 pointer-events-none">
+                        <div className={`absolute inset-0 rounded-xl transition-all duration-300 pointer-events-none ${
+                          isVinedHighlightActive
+                            ? 'border-emerald-400 ring-4 ring-emerald-500 ring-offset-1 ring-offset-slate-950 bg-emerald-800/60 shadow-[0_0_25px_rgba(16,185,129,1.0),inset_0_0_12px_rgba(255,255,255,1.0)] scale-105 z-20 animate-pulse border-[3px]'
+                            : 'bg-emerald-950/25 border-2 border-emerald-500 shadow-[inset_0_0_8px_rgba(16,185,129,0.6)] z-10'
+                        }`}>
                           <span className="absolute -top-1 -right-0.5 text-[10px] select-none">🍃</span>
                           <span className="absolute -bottom-1 -left-0.5 text-[10px] select-none">🌿</span>
                         </div>
@@ -773,6 +780,11 @@ export default function GameBoard({
                       {/* Ripple Beacon for extreme visibility */}
                       {cell.isLocked && isIceHighlightActive && (
                         <div className="absolute inset-0 z-25 rounded-xl border-2 border-cyan-200 animate-ping opacity-75 scale-120 pointer-events-none" />
+                      )}
+
+                      {/* Ripple Beacon for Vine extreme visibility */}
+                      {cell.isVined && isVinedHighlightActive && (
+                        <div className="absolute inset-0 z-25 rounded-xl border-2 border-emerald-300 animate-ping opacity-75 scale-120 pointer-events-none" />
                       )}
                     </motion.div>
                   )}

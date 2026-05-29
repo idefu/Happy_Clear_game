@@ -22,8 +22,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 600,
-    movesLimit: 18,
+    scoreGoal: 1200,
+    movesLimit: 15,
     allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.15,
     theme: 'river',
@@ -45,8 +45,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 2, 2, 2, 1],
       [1, 2, 2, 2, 1]
     ],
-    scoreGoal: 1000,
-    movesLimit: 20,
+    scoreGoal: 2000,
+    movesLimit: 16,
     allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.16,
     theme: 'river',
@@ -68,8 +68,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 1200,
-    movesLimit: 20,
+    scoreGoal: 2400,
+    movesLimit: 16,
     allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.16,
     theme: 'river',
@@ -90,8 +90,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 1],
       [1, 1, 0, 1, 1]
     ],
-    scoreGoal: 1400,
-    movesLimit: 18,
+    scoreGoal: 2800,
+    movesLimit: 15,
     allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.18,
     theme: 'river',
@@ -115,8 +115,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 1],
       [5, 1, 1, 1, 5]
     ],
-    scoreGoal: 1600,
-    movesLimit: 18,
+    scoreGoal: 3200,
+    movesLimit: 15,
     allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.18,
     theme: 'river',
@@ -142,8 +142,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 0, 1, 1],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 2500,
-    movesLimit: 19,
+    scoreGoal: 4500,
+    movesLimit: 16,
     allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.20,
     theme: 'river',
@@ -165,8 +165,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 3, 3, 3, 1],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 2800,
-    movesLimit: 22,
+    scoreGoal: 5000,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.20,
     theme: 'grassland',
@@ -189,8 +189,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 4],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 3200,
-    movesLimit: 22,
+    scoreGoal: 6000,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.22,
     theme: 'grassland',
@@ -214,8 +214,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 5, 1, 1, 5, 1],
       [0, 1, 1, 1, 1, 0]
     ],
-    scoreGoal: 4000,
-    movesLimit: 22,
+    scoreGoal: 7500,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.20,
     theme: 'grassland',
@@ -238,8 +238,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 4600,
-    movesLimit: 23,
+    scoreGoal: 8200,
+    movesLimit: 19,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.22,
     theme: 'grassland',
@@ -262,8 +262,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 3, 1, 1, 3, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 5400,
-    movesLimit: 24,
+    scoreGoal: 10000,
+    movesLimit: 20,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.24,
     theme: 'grassland',
@@ -291,8 +291,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 5, 5, 5, 5, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 6200,
-    movesLimit: 22,
+    scoreGoal: 11500,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.22,
     theme: 'grassland',
@@ -314,8 +314,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 2, 2, 2, 2, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 7000,
-    movesLimit: 24,
+    scoreGoal: 13000,
+    movesLimit: 20,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.22,
     theme: 'grassland',
@@ -342,8 +342,8 @@ export const LEVELS: LevelConfig[] = [
       [3, 1, 1, 1, 1, 3],
       [3, 3, 3, 3, 3, 3]
     ],
-    scoreGoal: 8200,
-    movesLimit: 25,
+    scoreGoal: 15000,
+    movesLimit: 20,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.24,
     theme: 'sky',
@@ -365,8 +365,8 @@ export const LEVELS: LevelConfig[] = [
       [0, 1, 1, 1, 1, 0],
       [0, 0, 1, 1, 0, 0]
     ],
-    scoreGoal: 9500,
-    movesLimit: 21,
+    scoreGoal: 17500,
+    movesLimit: 17,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.25,
     theme: 'sky',
@@ -388,13 +388,13 @@ export const LEVELS: LevelConfig[] = [
       [1, 4, 4, 4, 4, 1],
       [4, 1, 4, 4, 1, 4]
     ],
-    scoreGoal: 10500,
-    movesLimit: 23,
+    scoreGoal: 19000,
+    movesLimit: 19,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.26,
     theme: 'sky',
     specialGoals: {
-      vinedCount: 14
+      vinedCount: 12
     }
   },
   {
@@ -411,8 +411,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 2, 1, 1, 2, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 12000,
-    movesLimit: 24,
+    scoreGoal: 18000,
+    movesLimit: 20,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.26,
     theme: 'sky',
@@ -421,7 +421,6 @@ export const LEVELS: LevelConfig[] = [
       { r1: 1, c1: 4, r2: 4, c2: 1 }
     ],
     specialGoals: {
-      iceCount: 4,
       totalEliminations: 100
     }
   },
@@ -439,8 +438,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 5, 5, 1, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 13500,
-    movesLimit: 22,
+    scoreGoal: 23000,
+    movesLimit: 18,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.25,
     theme: 'sky',
@@ -462,8 +461,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 3, 3, 3, 3, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 15500,
-    movesLimit: 23,
+    scoreGoal: 26000,
+    movesLimit: 19,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.28,
     theme: 'sky',
@@ -490,8 +489,8 @@ export const LEVELS: LevelConfig[] = [
       [0, 1, 1, 1, 1, 0],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 18000,
-    movesLimit: 26,
+    scoreGoal: 30000,
+    movesLimit: 21,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.25,
     theme: 'starry',
@@ -514,8 +513,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 3, 3, 3, 3, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 22000,
-    movesLimit: 26,
+    scoreGoal: 35000,
+    movesLimit: 21,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.25,
     theme: 'starry',
@@ -538,8 +537,8 @@ export const LEVELS: LevelConfig[] = [
       [4, 1, 1, 1, 1, 4],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 25000,
-    movesLimit: 25,
+    scoreGoal: 38000,
+    movesLimit: 20,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.28,
     theme: 'starry',
@@ -547,7 +546,7 @@ export const LEVELS: LevelConfig[] = [
       { r1: 1, c1: 0, r2: 5, c2: 5 }
     ],
     specialGoals: {
-      vinedCount: 4,
+      vinedCount: 3,
       stoneCount: 4
     }
   },
@@ -566,8 +565,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 28000,
-    movesLimit: 24,
+    scoreGoal: 12000,
+    movesLimit: 19,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
     initialSpecialProbability: 0.26,
     theme: 'starry',
@@ -595,8 +594,8 @@ export const LEVELS: LevelConfig[] = [
       [5, 1, 1, 1, 1, 5],
       [5, 5, 2, 2, 5, 5]
     ],
-    scoreGoal: 32000,
-    movesLimit: 28,
+    scoreGoal: 48000,
+    movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.28,
     theme: 'starry',
@@ -620,8 +619,8 @@ export const LEVELS: LevelConfig[] = [
       [1, 4, 3, 3, 4, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 40000,
-    movesLimit: 30,
+    scoreGoal: 60000,
+    movesLimit: 24,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
     initialSpecialProbability: 0.32,
     theme: 'starry',

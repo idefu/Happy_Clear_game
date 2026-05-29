@@ -429,6 +429,7 @@ export function processMatchesAndGenerateSpecials(
   eliminatedCoords: { r: number; c: number }[];
   blastersCreatedCount: number;
   hyperExplodersCreatedCount: number;
+  bombsCreatedCount: number;
 } {
   const R = board.length;
   const C = board[0].length;
@@ -440,6 +441,7 @@ export function processMatchesAndGenerateSpecials(
 
   let blastersCreatedCount = 0;
   let hyperExplodersCreatedCount = 0;
+  let bombsCreatedCount = 0;
   const eliminatedCoordsMap: { [key: string]: boolean } = {};
   const eliminatedCoordsList: { r: number; c: number }[] = [];
 
@@ -643,6 +645,7 @@ export function processMatchesAndGenerateSpecials(
     bombTarget = getBestTargetCoord(dedupParallel, allMatchedCoords, hyperTarget);
     if (bombTarget) {
       createSpecialAt(bombTarget.r, bombTarget.c, 'BOMB');
+      bombsCreatedCount++;
     }
   }
   // --- End Custom Special Generation Logic ---
@@ -666,7 +669,8 @@ export function processMatchesAndGenerateSpecials(
     newBoard,
     eliminatedCoords: eliminatedCoordsList,
     blastersCreatedCount,
-    hyperExplodersCreatedCount
+    hyperExplodersCreatedCount,
+    bombsCreatedCount
   };
 }
 
@@ -681,6 +685,7 @@ export function triggerExplosions(
   iceBrokenCount: number;
   vinedClearedCount: number;
   stoneClearedCount: number;
+  iceDamaged: boolean;
 } {
   const R = board.length;
   const C = board[0].length;
@@ -692,6 +697,7 @@ export function triggerExplosions(
   let iceBrokenCount = 0;
   let vinedClearedCount = 0;
   let stoneClearedCount = 0;
+  let iceDamaged = false;
 
   // Enqueue initial matches
   for (const coord of startCoords) {
@@ -712,18 +718,35 @@ export function triggerExplosions(
     const tile = board[current.r][current.c];
     if (!tile) continue;
 
-    // Report this tile as cleared
-    finalEliminated.push({
-      r: current.r,
-      c: current.c,
-      actionTriggered: tile.special,
-      letter: tile.letter
-    });
+    let shouldEliminate = true;
 
-    // Dissolve vine of the exploding tile itself
+    // Check if the tile itself has a vine.
+    // "有藤曼的参与消除一次才会解锁藤曼，但设定上自身仍然存在并没有消失，当再次参与消除才会消除"
     if (tile.isVined) {
       tile.isVined = false;
       vinedClearedCount++;
+      shouldEliminate = false; // The vine is dissolved; the tile itself survives!
+    }
+
+    // Check if the tile itself has ice.
+    // "冰块设定是要参与两次消除才会消除冰块，有很多情况发现只消除一次就消失了"
+    if (tile.isLocked) {
+      iceDamaged = true;
+      if (tile.iceLevel === 2) {
+        tile.iceLevel = 1;
+        shouldEliminate = false; // Double-ice cracks to single-ice; tile survives!
+      } else {
+        tile.isLocked = false;
+        tile.iceLevel = 0;
+        iceBrokenCount++;
+        // Single-ice is fully shattered; tile gets eliminated (so shouldEliminate is true)!
+      }
+    }
+
+    // Check if the tile itself has stone.
+    if (tile.isStone) {
+      tile.isStone = false;
+      stoneClearedCount++;
     }
 
     // Check adjacent cells for frozen ice blocker layers or stone blockers or vines
@@ -744,9 +767,9 @@ export function triggerExplosions(
           }
           // B. Shatter Ice (handles double ice layer)
           else if (neighbor.isLocked) {
+            iceDamaged = true;
             if (neighbor.iceLevel === 2) {
               neighbor.iceLevel = 1;
-              iceBrokenCount++;
             } else {
               neighbor.isLocked = false;
               neighbor.iceLevel = 0;
@@ -762,85 +785,73 @@ export function triggerExplosions(
       }
     }
 
-    // Now, if this tile has specials, trigger them instantly
-    if (tile.special === 'ROW_BLASTER') {
-      const r = current.r;
-      for (let cScan = 0; cScan < C; cScan++) {
-        if (layout[r][cScan] !== 0 && !visited[r][cScan]) {
-          visited[r][cScan] = true;
-          const target = board[r][cScan];
-          if (target) {
-            queue.push({ r, c: cScan, trigger: 'ROW_BLASTER' });
-          }
-        }
-      }
-    } else if (tile.special === 'COL_BLASTER') {
-      const c = current.c;
-      for (let rScan = 0; rScan < R; rScan++) {
-        if (layout[rScan][c] !== 0 && !visited[rScan][c]) {
-          visited[rScan][c] = true;
-          const target = board[rScan][c];
-          if (target) {
-            queue.push({ r: rScan, c, trigger: 'COL_BLASTER' });
-          }
-        }
-      }
-    } else if (tile.special === 'HYPER_EXPLODER') {
-      // Find all tiles on board with SAME letter matching this, and destroy them too!
-      const letterToMatch = tile.letter;
-      for (let rScan = 0; rScan < R; rScan++) {
+    if (shouldEliminate) {
+      // Report this tile as cleared
+      finalEliminated.push({
+        r: current.r,
+        c: current.c,
+        actionTriggered: tile.special,
+        letter: tile.letter
+      });
+
+      // Now, if this tile has specials, trigger them instantly
+      if (tile.special === 'ROW_BLASTER') {
+        const r = current.r;
         for (let cScan = 0; cScan < C; cScan++) {
-          if (layout[rScan][cScan] !== 0 && !visited[rScan][cScan]) {
-            const target = board[rScan][cScan];
-            if (target && target.letter === letterToMatch) {
-              visited[rScan][cScan] = true;
-              queue.push({ r: rScan, c: cScan, trigger: 'HYPER_EXPLODER' });
-            }
-          }
-        }
-      }
-    } else if (tile.special === 'BOMB') {
-      // Find all adjacent cells within 8 directions (up-to-8 neighbors)
-      const offsets = [
-        [-1, -1], [-1, 0], [-1, 1],
-        [0, -1],           [0, 1],
-        [1, -1],  [1, 0],  [1, 1]
-      ];
-      for (const [dr, dc] of offsets) {
-        const nr = current.r + dr;
-        const nc = current.c + dc;
-        if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
-          if (layout[nr][nc] !== 0 && !visited[nr][nc]) {
-            visited[nr][nc] = true;
-            const target = board[nr][nc];
+          if (layout[r][cScan] !== 0 && !visited[r][cScan]) {
+            visited[r][cScan] = true;
+            const target = board[r][cScan];
             if (target) {
-              queue.push({ r: nr, c: nc, trigger: 'BOMB' });
+              queue.push({ r, c: cScan, trigger: 'ROW_BLASTER' });
+            }
+          }
+        }
+      } else if (tile.special === 'COL_BLASTER') {
+        const c = current.c;
+        for (let rScan = 0; rScan < R; rScan++) {
+          if (layout[rScan][c] !== 0 && !visited[rScan][c]) {
+            visited[rScan][c] = true;
+            const target = board[rScan][c];
+            if (target) {
+              queue.push({ r: rScan, c, trigger: 'COL_BLASTER' });
+            }
+          }
+        }
+      } else if (tile.special === 'HYPER_EXPLODER') {
+        // Find all tiles on board with SAME letter matching this, and destroy them too!
+        const letterToMatch = tile.letter;
+        for (let rScan = 0; rScan < R; rScan++) {
+          for (let cScan = 0; cScan < C; cScan++) {
+            if (layout[rScan][cScan] !== 0 && !visited[rScan][cScan]) {
+              const target = board[rScan][cScan];
+              if (target && target.letter === letterToMatch) {
+                visited[rScan][cScan] = true;
+                queue.push({ r: rScan, c: cScan, trigger: 'HYPER_EXPLODER' });
+              }
+            }
+          }
+        }
+      } else if (tile.special === 'BOMB') {
+        // Find all adjacent cells within 8 directions (up-to-8 neighbors)
+        const offsets = [
+          [-1, -1], [-1, 0], [-1, 1],
+          [0, -1],           [0, 1],
+          [1, -1],  [1, 0],  [1, 1]
+        ];
+        for (const [dr, dc] of offsets) {
+          const nr = current.r + dr;
+          const nc = current.c + dc;
+          if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
+            if (layout[nr][nc] !== 0 && !visited[nr][nc]) {
+              visited[nr][nc] = true;
+              const target = board[nr][nc];
+              if (target) {
+                queue.push({ r: nr, c: nc, trigger: 'BOMB' });
+              }
             }
           }
         }
       }
-    }
-    
-    // Also if the matched cell is actually frozen, unfreeze it!
-    if (tile.isLocked) {
-      if (tile.iceLevel === 2) {
-        tile.iceLevel = 1;
-        iceBrokenCount++;
-      } else {
-        tile.isLocked = false;
-        tile.iceLevel = 0;
-        iceBrokenCount++;
-      }
-    }
-    // Dissolve vine if matched
-    if (tile.isVined) {
-      tile.isVined = false;
-      vinedClearedCount++;
-    }
-    // Break stone if matched
-    if (tile.isStone) {
-      tile.isStone = false;
-      stoneClearedCount++;
     }
   }
 
@@ -848,7 +859,8 @@ export function triggerExplosions(
     finalEliminated,
     iceBrokenCount,
     vinedClearedCount,
-    stoneClearedCount
+    stoneClearedCount,
+    iceDamaged
   };
 }
 
@@ -856,7 +868,8 @@ export function triggerExplosions(
 export function applyGravityAndSpawn(
   board: GridCell[][],
   level: LevelConfig,
-  noSpecialSpawns?: boolean
+  noSpecialSpawns?: boolean,
+  playerCreatedSpecialsCount?: number
 ): {
   newBoard: GridCell[][];
   spawnedCount: number;
@@ -919,11 +932,88 @@ export function applyGravityAndSpawn(
           else special = 'COL_BLASTER';
         }
 
+        // To reduce the auto-combo probability, pick a letter that doesn't immediately match with neighbors if possible
+        let chosenLetter = getRandomLetter(level.allowedLetters);
+        
+        // Calculate dynamic influence of player-created specials on combo probability
+        const specials = playerCreatedSpecialsCount || 0;
+        
+        // 1. Skip anti-match check entirely with a progressive probability (starts at 2+)
+        let skipAntiMatch = false;
+        if (specials >= 2) {
+          // Progressively scaled probability starting at 2 specials:
+          // 2 -> 7.5%, 3 -> 15%, 4 -> 22.5%, 5 -> 30%, 6 -> 37.5%, 7 -> 45%, etc., max 70%
+          const skipThreshold = Math.min(0.70, (specials - 1) * 0.075);
+          if (Math.random() < skipThreshold) {
+            skipAntiMatch = true;
+          }
+        }
+
+        // 2. Lucky Match Assist: Actively bias the letter to match neighboring cells (only when specials >= 4)
+        // This is a subtle nudge to create beautiful chains
+        if (specials >= 4) {
+          // Assist rate starting at 4 specials:
+          // 4 -> 5%, 5 -> 10%, 6 -> 15%, 7 -> 20%, 8 -> 25%, 9 -> 30%, 10+ -> up to 45%
+          const assistThreshold = Math.min(0.45, (specials - 3) * 0.05);
+          if (Math.random() < assistThreshold) {
+            // Collect any valid neighbor letters
+            const neighborLetters: Letter[] = [];
+            const blockLeft = c >= 1 ? newBoard[r][c - 1] : null;
+            const blockRight = c < C - 1 ? newBoard[r][c + 1] : null;
+            const blockUp = r >= 1 ? newBoard[r - 1][c] : null;
+            const blockDown = r < R - 1 ? newBoard[r + 1][c] : null;
+
+            if (blockLeft && level.allowedLetters.includes(blockLeft.letter)) neighborLetters.push(blockLeft.letter);
+            if (blockRight && level.allowedLetters.includes(blockRight.letter)) neighborLetters.push(blockRight.letter);
+            if (blockUp && level.allowedLetters.includes(blockUp.letter)) neighborLetters.push(blockUp.letter);
+            if (blockDown && level.allowedLetters.includes(blockDown.letter)) neighborLetters.push(blockDown.letter);
+
+            if (neighborLetters.length > 0) {
+              // Pick one of the neighbor letters to spawn! Highly likely to cascade
+              chosenLetter = neighborLetters[Math.floor(Math.random() * neighborLetters.length)];
+              skipAntiMatch = true; // Naturally bypass the anti-match check
+            }
+          }
+        }
+
+        let attempts = 0;
+        // If skipAntiMatch is true, we set maxAttempts = 0, bypassing the loop completely and spawning the match-favoring block!
+        const maxAttempts = skipAntiMatch ? 0 : 15;
+
+        while (attempts < maxAttempts) {
+          // Horizontal checks (using newBoard):
+          const blockLeft1 = c >= 1 ? newBoard[r][c - 1] : null;
+          const blockLeft2 = c >= 2 ? newBoard[r][c - 2] : null;
+          const blockRight1 = c < C - 1 ? newBoard[r][c + 1] : null;
+          const blockRight2 = c < C - 2 ? newBoard[r][c + 2] : null;
+
+          const hasHorizMatchLeft = blockLeft1 && blockLeft2 && blockLeft1.letter === chosenLetter && blockLeft2.letter === chosenLetter;
+          const hasHorizMatchRight = blockRight1 && blockRight2 && blockRight1.letter === chosenLetter && blockRight2.letter === chosenLetter;
+          const hasHorizMatchMiddle = blockLeft1 && blockRight1 && blockLeft1.letter === chosenLetter && blockRight1.letter === chosenLetter;
+
+          // Vertical checks:
+          const blockUp1 = r >= 1 ? newBoard[r - 1][c] : null;
+          const blockUp2 = r >= 2 ? newBoard[r - 2][c] : null;
+          const blockDown1 = r < R - 1 ? newBoard[r + 1][c] : null;
+          const blockDown2 = r < R - 2 ? newBoard[r + 2][c] : null;
+
+          const hasVertMatchUp = blockUp1 && blockUp2 && blockUp1.letter === chosenLetter && blockUp2.letter === chosenLetter;
+          const hasVertMatchDown = blockDown1 && blockDown2 && blockDown1.letter === chosenLetter && blockDown2.letter === chosenLetter;
+          const hasVertMatchMiddle = blockUp1 && blockDown1 && blockUp1.letter === chosenLetter && blockDown1.letter === chosenLetter;
+
+          if (!hasHorizMatchLeft && !hasHorizMatchRight && !hasHorizMatchMiddle &&
+              !hasVertMatchUp && !hasVertMatchDown && !hasVertMatchMiddle) {
+            break;
+          }
+          chosenLetter = getRandomLetter(level.allowedLetters);
+          attempts++;
+        }
+
         newBoard[r][c] = {
           id: generateId(),
           row: r,
           col: c,
-          letter: getRandomLetter(level.allowedLetters),
+          letter: chosenLetter,
           special,
           isLocked: false,
           isNew: true

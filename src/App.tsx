@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LEVELS } from './data/levels';
 import { GameState, GridCell, LevelConfig, Letter, SpecialEffect } from './types';
-import { createInitialBoard, scanMatches, processMatchesAndGenerateSpecials, triggerExplosions, applyGravityAndSpawn, checkPotentialMoves, shuffleEntireBoard } from './utils/gameLogic';
+import { createInitialBoard, scanMatches, processMatchesAndGenerateSpecials, triggerExplosions, applyGravityAndSpawn, checkPotentialMoves, shuffleEntireBoard, isPortalCell } from './utils/gameLogic';
 import ScoreBoard from './components/ScoreBoard';
 import GameBoard from './components/GameBoard';
 import LevelSelector from './components/LevelSelector';
@@ -25,6 +25,7 @@ export default function App() {
   const currentLevelRef = useRef<LevelConfig | null>(null);
   currentLevelRef.current = activeLevel;
   const gameRunIdRef = useRef<number>(0);
+  const bonusPhaseStartedRef = useRef<boolean>(false);
 
   // Sound settings
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -47,6 +48,7 @@ export default function App() {
   const [isLost, setIsLost] = useState(false);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [playerCreatedSpecials, setPlayerCreatedSpecials] = useState<number>(0);
   
   // Stored details of elements eliminated in the latest cascade to trigger canvas sparkles
   const [deletedPoints, setDeletedPoints] = useState<{ r: number; c: number; actionTriggered: SpecialEffect; letter: Letter }[]>([]);
@@ -86,11 +88,29 @@ export default function App() {
     }, 2200);
   };
 
+  // Vine block click highlight tracker
+  const [isVinedHighlighted, setIsVinedHighlighted] = useState(false);
+  const vinedHighlightTimeoutRef = useRef<any>(null);
+
+  const handleVinedClicked = () => {
+    if (vinedHighlightTimeoutRef.current) {
+      clearTimeout(vinedHighlightTimeoutRef.current);
+    }
+    sound.playSwap(); // Play confirmation sonar chime
+    setIsVinedHighlighted(true);
+    vinedHighlightTimeoutRef.current = setTimeout(() => {
+      setIsVinedHighlighted(false);
+    }, 2200);
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (iceHighlightTimeoutRef.current) {
         clearTimeout(iceHighlightTimeoutRef.current);
+      }
+      if (vinedHighlightTimeoutRef.current) {
+        clearTimeout(vinedHighlightTimeoutRef.current);
       }
     };
   }, []);
@@ -122,6 +142,7 @@ export default function App() {
   // Launch a selected level and configure starting layout
   const handleSelectLevel = (levelId: number) => {
     gameRunIdRef.current += 1;
+    bonusPhaseStartedRef.current = false;
     const targetLvl = LEVELS.find(l => l.id === levelId) || LEVELS[0];
     setActiveLevel(targetLvl);
 
@@ -137,6 +158,7 @@ export default function App() {
     setIsAnimating(false);
     setIsNewHighScore(false);
     setDeletedPoints([]);
+    setPlayerCreatedSpecials(0);
 
     setGoalsProgress({
       iceCleared: 0,
@@ -261,6 +283,9 @@ export default function App() {
     );
 
     if (gameCompleted) {
+      if (bonusPhaseStartedRef.current) return;
+      bonusPhaseStartedRef.current = true;
+
       if (movesLeft > 0) {
         // Trigger sugar-rush bonus round for unused moves!
         runBonusPhase(
@@ -272,7 +297,8 @@ export default function App() {
           maxComboAchieved,
           letterClearsMap,
           vinedCountCleared,
-          stoneCountCleared
+          stoneCountCleared,
+          currentRunId
         );
       } else {
         setIsAnimating(true);
@@ -317,7 +343,8 @@ export default function App() {
     maxComboAchieved: number,
     letterClearsMap: { [key in Letter]?: number },
     vinedCountCleared: number,
-    stoneCountCleared: number
+    stoneCountCleared: number,
+    currentRunId?: number
   ) => {
     if (!activeLevel) return;
     setIsAnimating(true);
@@ -332,23 +359,22 @@ export default function App() {
     let localStoneCleared = stoneCountCleared;
     const levelId = activeLevel.id;
 
-    // Step A: Mark remaining moves as random items on the board sequentially
-    while (tempMoves > 0) {
-      const validPositions: { r: number; c: number }[] = [];
-      for (let r = 0; r < workingBoard.length; r++) {
-        for (let c = 0; c < workingBoard[r].length; c++) {
-          const cell = workingBoard[r][c];
-          if (cell && !cell.isLocked && !cell.isVined && !cell.isStone && cell.special === 'NONE') {
-            validPositions.push({ r, c });
-          }
+    // Step A: Mark all remaining moves as random items on the board sequentially
+    const validPositions: { r: number; c: number }[] = [];
+    for (let r = 0; r < workingBoard.length; r++) {
+      for (let c = 0; c < workingBoard[r].length; c++) {
+        const cell = workingBoard[r][c];
+        if (cell && !cell.isLocked && !cell.isVined && !cell.isStone && cell.special === 'NONE') {
+          validPositions.push({ r, c });
         }
       }
+    }
 
-      if (validPositions.length === 0) break;
-
+    let placedCount = 0;
+    while (tempMoves > 0 && validPositions.length > 0) {
       // Select a random coordinates slot
       const randIdx = Math.floor(Math.random() * validPositions.length);
-      const { r, c } = validPositions[randIdx];
+      const { r, c } = validPositions.splice(randIdx, 1)[0];
 
       // Assign a random special effect
       const specials: SpecialEffect[] = ['ROW_BLASTER', 'COL_BLASTER', 'BOMB', 'HYPER_EXPLODER'];
@@ -356,19 +382,29 @@ export default function App() {
 
       workingBoard[r][c]!.special = chosenSpecial;
       workingBoard[r][c]!.isNew = true; // highlight drop spark
-      setBoard(workingBoard.map(row => row.map(cell => cell ? { ...cell } : null)));
-      
+      placedCount++;
       tempMoves--;
+
+      // Update remaining moves and render board with new special
+      setBoard(workingBoard.map(row => row.map(cell => cell ? { ...cell } : null)));
       setMovesRemaining(tempMoves);
-      sound.playSwap(); // popup slide chime sound
-      
-      await sleep(200); // 200ms sequential layout delay
+      sound.playSwap(); // Play popup glide sound per piece converted
+
+      await sleep(150); // Snappy sequential delay
       if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+      if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
     }
 
-    // Step B: Sequentially detonate every special element until the board is completely clear
+    if (placedCount > 0) {
+      await sleep(650); // Pause briefly (650ms) to let player admire all the new special blocks before detonating
+      if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+      if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
+    }
+
+    // Step B: Detonate all generated special elements simultaneously, then resolve any triggered cascades
     let continuesDetonating = true;
     while (continuesDetonating) {
+      if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
       // Find specials currently present on the board
       const specialsOnBoard: { r: number; c: number }[] = [];
       for (let r = 0; r < workingBoard.length; r++) {
@@ -385,12 +421,12 @@ export default function App() {
         break;
       }
 
-      // Detonate the first item
-      const startCoord = specialsOnBoard[0];
+      // Detonate them in multiple cascading waves
       let comboCount = 0;
       let isFirstExplosion = true;
 
       while (isFirstExplosion || checkHasAnyActiveMatches(workingBoard)) {
+        if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
         const matchesInBonus = isFirstExplosion ? [] : scanMatches(workingBoard, activeLevel.layout);
         isFirstExplosion = false;
 
@@ -399,33 +435,45 @@ export default function App() {
           newBoard: boardWithUpgrades, 
           eliminatedCoords,
           blastersCreatedCount,
-          hyperExplodersCreatedCount
+          hyperExplodersCreatedCount,
+          bombsCreatedCount
         } = processMatchesAndGenerateSpecials(workingBoard, matchesInBonus, null);
 
         let initialExplodeCoords = [...eliminatedCoords];
         if (comboCount === 0) {
-          initialExplodeCoords.push(startCoord); // include starter cue
+          // Detonate ALL the initial specials on the board at once!
+          initialExplodeCoords.push(...specialsOnBoard);
         }
 
-        const { finalEliminated, iceBrokenCount, vinedClearedCount, stoneClearedCount } = triggerExplosions(boardWithUpgrades, initialExplodeCoords, activeLevel.layout);
+        const { finalEliminated, iceBrokenCount, vinedClearedCount, stoneClearedCount, iceDamaged } = triggerExplosions(boardWithUpgrades, initialExplodeCoords, activeLevel.layout);
 
         localIceCleared += iceBrokenCount;
         localVinedCleared += vinedClearedCount;
         localStoneCleared += stoneClearedCount;
-        if (iceBrokenCount > 0) {
+        if (iceBrokenCount > 0 || iceDamaged) {
           sound.playIceShatter();
         }
 
         localTotalEliminations += finalEliminated.length;
+        let triggeredLaser = false;
+        let triggeredExplode = false;
+
         finalEliminated.forEach(pe => {
           localLettersClearedMap[pe.letter] = (localLettersClearedMap[pe.letter] || 0) + 1;
           
           if (pe.actionTriggered === 'ROW_BLASTER' || pe.actionTriggered === 'COL_BLASTER') {
-            sound.playLaserBlast();
+            triggeredLaser = true;
           } else if (pe.actionTriggered === 'HYPER_EXPLODER' || pe.actionTriggered === 'BOMB') {
-            sound.playHyperExplode();
+            triggeredExplode = true;
           }
         });
+
+        if (triggeredLaser) {
+          sound.playLaserBlast();
+        }
+        if (triggeredExplode) {
+          sound.playHyperExplode();
+        }
 
         // Cumulative bonus scoring increments
         let waveBonusPoints = 0;
@@ -469,6 +517,7 @@ export default function App() {
 
         await sleep(250); // visual shrinkage delay
         if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+        if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
 
         const boardWithEmptyNulls = transitionTagBoard.map(row =>
           row.map(cell => (cell && cell.isEliminating ? null : cell))
@@ -481,6 +530,7 @@ export default function App() {
 
         await sleep(350); // visual drop/fall layout delay
         if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+        if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
 
         comboCount++;
       }
@@ -489,6 +539,7 @@ export default function App() {
     // Done detonating, let the final state settle beautifully for 1.2s before displaying the win panel
     await sleep(1200);
     if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+    if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
 
     sound.playLevelWin();
     setIsWon(true);
@@ -500,50 +551,69 @@ export default function App() {
   const handleSwapAction = async (r1: number, c1: number, r2: number, c2: number) => {
     if (isAnimating || !activeLevel) return;
     const initialLevelId = activeLevel.id;
+    const initialRunId = gameRunIdRef.current;
     setIsAnimating(true);
+
+    const activeLevelPortals = activeLevel.portals;
+    const isP1 = isPortalCell(r1, c1, activeLevelPortals);
+    const isP2 = isPortalCell(r2, c2, activeLevelPortals);
 
     // 1. Temporarily swap two nodes inside local copy
     let workingBoard = board.map(row => row.map(cell => cell ? { ...cell } : null));
-    const t1 = workingBoard[r1][c1]!;
-    const t2 = workingBoard[r2][c2]!;
+    let t1 = workingBoard[r1][c1];
+    let t2 = workingBoard[r2][c2];
 
-    // Reapply coordinates
-    workingBoard[r1][c1] = { ...t2, row: r1, col: c1 };
-    workingBoard[r2][c2] = { ...t1, row: r2, col: c2 };
-
-    // Portal travel teleport substitution
-    if (activeLevel.portals && activeLevel.portals.length > 0) {
-      for (const pair of activeLevel.portals) {
-        const isP1 = (r1 === pair.r1 && c1 === pair.c1);
-        const isP2 = (r2 === pair.r2 && c2 === pair.c2);
-
-        let portalCoord: {r: number, c: number} | null = null;
-        let partnerCoord: {r: number, c: number} | null = null;
-        let targetCoord: {r: number, c: number} | null = null;
-
-        if (isP1 && !isP2) {
-          portalCoord = { r: r1, c: c1 };
-          partnerCoord = { r: pair.r2, c: pair.c2 };
-          targetCoord = { r: r2, c: c2 };
-        } else if (isP2 && !isP1) {
-          portalCoord = { r: r2, c: c2 };
-          partnerCoord = { r: pair.r1, c: pair.c1 };
-          targetCoord = { r: r1, c: c1 };
-        }
-
-        if (portalCoord && partnerCoord && targetCoord) {
-          // Teleport neighbor tile!
-          const tileToTeleport = workingBoard[portalCoord.r][portalCoord.c];
-          const partnerTile = workingBoard[partnerCoord.r][partnerCoord.c];
-          
-          if (tileToTeleport && partnerTile) {
-            workingBoard[partnerCoord.r][partnerCoord.c] = { ...tileToTeleport, row: partnerCoord.r, col: partnerCoord.c };
-            workingBoard[portalCoord.r][portalCoord.c] = { ...partnerTile, row: portalCoord.r, col: portalCoord.c };
-            sound.playLaserBlast(); // Space travel teleport sound
-          }
-          break;
-        }
+    if (isP1 || isP2) {
+      if (isP1 && isP2) {
+        sound.playBounce();
+        setIsAnimating(false);
+        return;
       }
+
+      const p_portal_r = isP1 ? r1 : r2;
+      const p_portal_c = isP1 ? c1 : c2;
+      const r1_orig = isP1 ? r2 : r1;
+      const c1_orig = isP1 ? c2 : c1;
+
+      const originTile = workingBoard[r1_orig][c1_orig];
+      if (!originTile || originTile.isLocked || originTile.isVined || originTile.isStone || originTile.special === 'HYPER_EXPLODER') {
+        sound.playBounce();
+        setIsAnimating(false);
+        return;
+      }
+
+      // Find partner portal coordinate
+      const pair = activeLevelPortals?.find(p => (p.r1 === p_portal_r && p.c1 === p_portal_c) || (p.r2 === p_portal_r && p.c2 === p_portal_c));
+      if (!pair) {
+        sound.playBounce();
+        setIsAnimating(false);
+        return;
+      }
+
+      const rt = (p_portal_r === pair.r1 && p_portal_c === pair.c1) ? pair.r2 : pair.r1;
+      const ct = (p_portal_r === pair.r1 && p_portal_c === pair.c1) ? pair.c2 : pair.c1;
+
+      const targetTile = workingBoard[rt][ct];
+
+      // Teleport: origin tile goes to partner portal cells
+      workingBoard[rt][ct] = { ...originTile, row: rt, col: ct, isNew: true };
+      workingBoard[r1_orig][c1_orig] = targetTile ? { ...targetTile, row: r1_orig, col: c1_orig } : null;
+      workingBoard[p_portal_r][p_portal_c] = null; // Portal frame cell remains null
+
+      // Keep t1 & t2 variables aligned for subsequent calculations
+      t1 = originTile;
+      t2 = targetTile;
+
+      sound.playLaserBlast(); // Teleport sound
+    } else {
+      // Normal swap
+      if (!t1 || !t2) {
+        sound.playBounce();
+        setIsAnimating(false);
+        return;
+      }
+      workingBoard[r1][c1] = { ...t2, row: r1, col: c1 };
+      workingBoard[r2][c2] = { ...t1, row: r2, col: c2 };
     }
 
     setBoard(workingBoard);
@@ -551,25 +621,48 @@ export default function App() {
 
     await sleep(250); // visual transit
     if (!currentLevelRef.current || currentLevelRef.current.id !== initialLevelId) return;
+    if (gameRunIdRef.current !== initialRunId) return;
 
     // 2. Scan standard Match 3 line connections
     const matchGroups = scanMatches(workingBoard, activeLevel.layout);
 
-    const isHyperExploderSwap = (t1.special === 'HYPER_EXPLODER' || t2.special === 'HYPER_EXPLODER');
-    const isDualSpecialSwap = (t1.special !== 'NONE' && t2.special !== 'NONE');
+    const isHyperExploderSwap = (t1 && t1.special === 'HYPER_EXPLODER') || (t2 && t2.special === 'HYPER_EXPLODER');
+    const isDualSpecialSwap = (t1 && t1.special !== 'NONE') && (t2 && t2.special !== 'NONE');
 
     if (matchGroups.length === 0 && !isDualSpecialSwap && !isHyperExploderSwap) {
       // Swapping is invalid! Restore coordinates
       workingBoard = workingBoard.map(row => row.map(cell => cell ? { ...cell } : null));
-      const rt1 = workingBoard[r1][c1]!;
-      const rt2 = workingBoard[r2][c2]!;
-      workingBoard[r1][c1] = { ...rt2, row: r1, col: c1 };
-      workingBoard[r2][c2] = { ...rt1, row: r2, col: c2 };
+      
+      if (isP1 || isP2) {
+        const p_portal_r = isP1 ? r1 : r2;
+        const p_portal_c = isP1 ? c1 : c2;
+        const r1_orig = isP1 ? r2 : r1;
+        const c1_orig = isP1 ? c2 : c1;
+        const pair = activeLevelPortals?.find(p => (p.r1 === p_portal_r && p.c1 === p_portal_c) || (p.r2 === p_portal_r && p.c2 === p_portal_c));
+        if (pair) {
+          const rt = (p_portal_r === pair.r1 && p_portal_c === pair.c1) ? pair.r2 : pair.r1;
+          const ct = (p_portal_r === pair.r1 && p_portal_c === pair.c1) ? pair.c2 : pair.c1;
+          
+          let originalTile = workingBoard[rt][ct];
+          let originalTargetTile = workingBoard[r1_orig][c1_orig];
+          
+          workingBoard[r1_orig][c1_orig] = originalTile ? { ...originalTile, row: r1_orig, col: c1_orig } : null;
+          workingBoard[rt][ct] = originalTargetTile ? { ...originalTargetTile, row: rt, col: ct } : null;
+          workingBoard[p_portal_r][p_portal_c] = null;
+        }
+      } else {
+        const rt1 = workingBoard[r1][c1]!;
+        const rt2 = workingBoard[r2][c2]!;
+        workingBoard[r1][c1] = { ...rt2, row: r1, col: c1 };
+        workingBoard[r2][c2] = { ...rt1, row: r2, col: c2 };
+      }
+
       setBoard(workingBoard);
       sound.playBounce();
       
       await sleep(250);
       if (!currentLevelRef.current || currentLevelRef.current.id !== initialLevelId) return;
+      if (gameRunIdRef.current !== initialRunId) return;
       setIsAnimating(false);
       return;
     }
@@ -593,13 +686,13 @@ export default function App() {
     let hyperExploderCoords: {r: number, c: number}[] = [];
 
     if (isHyperSweepActive) {
-      if (t1.special === 'HYPER_EXPLODER' && t2.special === 'HYPER_EXPLODER') {
+      if (t1 && t2 && t1.special === 'HYPER_EXPLODER' && t2.special === 'HYPER_EXPLODER') {
         hyperSweepLetter = 'ANY';
       } else {
-        hyperSweepLetter = t1.special === 'HYPER_EXPLODER' ? t2.letter : t1.letter;
+        hyperSweepLetter = (t1 && t1.special === 'HYPER_EXPLODER') ? (t2 ? t2.letter : 'A') : (t1 ? t1.letter : 'A');
       }
-      if (t1.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r2, c: c2 });
-      if (t2.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r1, c: c1 });
+      if (t1 && t1.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r2, c: c2 });
+      if (t2 && t2.special === 'HYPER_EXPLODER') hyperExploderCoords.push({ r: r1, c: c1 });
     }
 
     while (matchGroups.length > 0 || dualSpecialActive || isHyperSweepActive || checkHasAnyActiveMatches(workingBoard)) {
@@ -611,8 +704,17 @@ export default function App() {
         newBoard: boardWithUpgrades, 
         eliminatedCoords, 
         blastersCreatedCount, 
-        hyperExplodersCreatedCount 
+        hyperExplodersCreatedCount,
+        bombsCreatedCount
       } = processMatchesAndGenerateSpecials(workingBoard, activeMatches, swapCoordsToUpgrade);
+
+      // Only count specials created on wave 0 (the player's direct match swap trigger)
+      if (comboCount === 0) {
+        const manualSpecialsCreated = blastersCreatedCount + hyperExplodersCreatedCount + bombsCreatedCount;
+        if (manualSpecialsCreated > 0) {
+          setPlayerCreatedSpecials(prev => prev + manualSpecialsCreated);
+        }
+      }
 
       // Swapped upgrades are only placed on the first wave!
       swapCoordsToUpgrade = null;
@@ -660,7 +762,7 @@ export default function App() {
       }
 
       // b. Resolve chain explosions (Row / Col Blasters and Color-bombs recursion!)
-      const { finalEliminated, iceBrokenCount, vinedClearedCount, stoneClearedCount } = triggerExplosions(boardWithUpgrades, initialExplodeCoords, activeLevel.layout);
+      const { finalEliminated, iceBrokenCount, vinedClearedCount, stoneClearedCount, iceDamaged } = triggerExplosions(boardWithUpgrades, initialExplodeCoords, activeLevel.layout);
 
       // Rule 5: If both row blaster and col blaster are triggered in this wave, award a BOMB
       const hadRowBlasterTriggered = finalEliminated.some(pe => pe.actionTriggered === 'ROW_BLASTER');
@@ -670,21 +772,31 @@ export default function App() {
       localIceCleared += iceBrokenCount;
       localVinedCleared += vinedClearedCount;
       localStoneCleared += stoneClearedCount;
-      if (iceBrokenCount > 0) {
+      if (iceBrokenCount > 0 || iceDamaged) {
         sound.playIceShatter();
       }
 
       // Check audio cues and update letters statistics
       localTotalEliminations += finalEliminated.length;
+      let triggeredLaser = false;
+      let triggeredExplode = false;
+
       finalEliminated.forEach(pe => {
         localLettersClearedMap[pe.letter] = (localLettersClearedMap[pe.letter] || 0) + 1;
         
         if (pe.actionTriggered === 'ROW_BLASTER' || pe.actionTriggered === 'COL_BLASTER') {
-          sound.playLaserBlast();
+          triggeredLaser = true;
         } else if (pe.actionTriggered === 'HYPER_EXPLODER' || pe.actionTriggered === 'BOMB') {
-          sound.playHyperExplode();
+          triggeredExplode = true;
         }
       });
+
+      if (triggeredLaser) {
+        sound.playLaserBlast();
+      }
+      if (triggeredExplode) {
+        sound.playHyperExplode();
+      }
 
       // points tracking calculations
       let wavePointsGain = 0;
@@ -732,13 +844,14 @@ export default function App() {
 
       await sleep(250); // wait for tiles shrink fadeout
       if (!currentLevelRef.current || currentLevelRef.current.id !== initialLevelId) return;
+      if (gameRunIdRef.current !== initialRunId) return;
 
       // c. Squeeze list and run Gravity Fall calculations
       const boardWithEmptyNulls = transitionTagBoard.map(row =>
          row.map(cell => (cell && cell.isEliminating ? null : cell))
       );
 
-      const { newBoard: boardWithGravitySlide, spawnedCount } = applyGravityAndSpawn(boardWithEmptyNulls, activeLevel);
+      const { newBoard: boardWithGravitySlide, spawnedCount } = applyGravityAndSpawn(boardWithEmptyNulls, activeLevel, false, playerCreatedSpecials);
       let localGravityBoard = boardWithGravitySlide;
 
       // If bomb awarded, apply BOMB effect to one of the newly spawned tiles
@@ -778,6 +891,7 @@ export default function App() {
 
       await sleep(350); // wait for tiles fall anim drop
       if (!currentLevelRef.current || currentLevelRef.current.id !== initialLevelId) return;
+      if (gameRunIdRef.current !== initialRunId) return;
 
       // d. Scan if fall triggered side cascading matches on next iteration
       matchGroups.length = 0; // Clear original array
@@ -803,7 +917,8 @@ export default function App() {
           localLettersClearedMap, 
           workingBoard,
           localVinedCleared,
-          localStoneCleared
+          localStoneCleared,
+          initialRunId
         );
       }, 80);
 
@@ -891,11 +1006,13 @@ export default function App() {
                 movesRemaining={movesRemaining}
                 goalsProgress={goalsProgress}
                 isIceHighlighted={isIceHighlighted}
+                isVinedHighlighted={isVinedHighlighted}
                 soundEnabled={soundEnabled}
                 onToggleSound={() => setSoundEnabled(!soundEnabled)}
                 onResetLevel={handleResetLevel}
                 onBackToMenu={handleBackToMenu}
                 onIceGoalClick={handleIceClicked}
+                onVinedGoalClick={handleVinedClicked}
               >
                 {/* Grid cell board */}
                 <GameBoard
@@ -907,6 +1024,7 @@ export default function App() {
                   soundEnabled={soundEnabled}
                   onIceClicked={handleIceClicked}
                   isIceHighlightActive={isIceHighlighted}
+                  isVinedHighlightActive={isVinedHighlighted}
                 />
               </ScoreBoard>
             </motion.div>
