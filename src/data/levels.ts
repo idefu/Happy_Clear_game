@@ -6,12 +6,15 @@
 import { LevelConfig } from '../types';
 
 export const LEVELS: LevelConfig[] = [
+  // ==========================================
+  // TUTORIAL / EASY INTRO LEVELS (1-5) - Theme: river
+  // ==========================================
   {
     id: 1,
-    name: "A.B.C. Beginnings",
+    name: "Happy Beginnings",
     chineseName: "快乐初体验",
-    description: "Beginner level. Swap adjacent letters to match 3 of the same letters in a line. Simple and sweet!",
-    chineseDescription: "新手热身关卡。通过上下左右滑动交换相邻字母，拼出3个或3个以上连击。简单而有趣！",
+    description: "Welcome! Swap adjacent letters to match 3 of the same letters in a line. Simple and sweet!",
+    chineseDescription: "新手热身关卡。通过左右、上下翻转滑动交换相邻字母，拼出3个或3个以上连击。简单而有趣！",
     layout: [
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
@@ -19,686 +22,617 @@ export const LEVELS: LevelConfig[] = [
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 1000,
+    scoreGoal: 600,
     movesLimit: 18,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.12
+    allowedLetters: ['A', 'B', 'C', 'D'],
+    initialSpecialProbability: 0.15,
+    theme: 'river',
+    specialGoals: {
+      totalEliminations: 25,
+      letter: { A: 8, B: 8 }
+    }
   },
   {
     id: 2,
-    name: "The Grand Cross",
-    chineseName: "十字圣殿",
-    description: "A cross-shaped arena. Irregular corners limit matching. Watch your steps!",
-    chineseDescription: "经典的十字形棋盘。角落被空地阻隔，使匹配空间集中，滑动需要更富有技巧性！",
+    name: "Frosty Streams",
+    chineseName: "冰霜溪流",
+    description: "Ice barriers block the lower board. Match letters adjacent or on frozen cells to shatter the ice!",
+    chineseDescription: "寒霜开始覆盖底部的格位。在冰霜格子旁边进行消除，即可消除可爱的冰层！",
     layout: [
-      [0, 1, 1, 1, 0],
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 0]
+      [1, 2, 2, 2, 1],
+      [1, 2, 2, 2, 1]
     ],
-    scoreGoal: 1600,
+    scoreGoal: 1000,
     movesLimit: 20,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.14,
+    allowedLetters: ['A', 'B', 'C', 'D'],
+    initialSpecialProbability: 0.16,
+    theme: 'river',
     specialGoals: {
-      letter: { 'A': 8, 'B': 8 }
+      iceCount: 6
     }
   },
   {
     id: 3,
-    name: "Frosty Fortress",
-    chineseName: "冰封禁地",
-    description: "Ice barriers block the lower board. Match adjacent to shatter the ice locks!",
-    chineseDescription: "冰霜封锁住了中央的关键。在冰霜格子旁边进行消除去除坚硬碎冰吧！",
+    name: "Vined Rapids",
+    chineseName: "藤蔓湍急",
+    description: "Ivy vines trap some tiles! Vines prevent them from swapping, but you can match with them to dissolve the vines!",
+    chineseDescription: "神秘藤蔓缠绕住了中央。这些字母无法滑动，但您可以直接参与对齐匹配来松绑！",
     layout: [
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
-      [1, 2, 2, 2, 1],
-      [1, 2, 2, 2, 1],
+      [1, 4, 1, 4, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 2200,
+    scoreGoal: 1200,
     movesLimit: 20,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.15,
+    allowedLetters: ['A', 'B', 'C', 'D'],
+    initialSpecialProbability: 0.16,
+    theme: 'river',
     specialGoals: {
-      iceCount: 6,
-      totalEliminations: 28
+      vinedCount: 2
     }
   },
   {
     id: 4,
-    name: "Twin Pillars",
-    chineseName: "双塔圣殿",
-    description: "Two narrow vertical towers separated by a central gap. Gravity feeds separately!",
-    chineseDescription: "两个完全孤立的立柱，中间有一道无底深渊隔开。多多利用合成激光来穿透长廊连击吧！",
+    name: "Twin Gates",
+    chineseName: "双子传送门",
+    description: "Weird spatial portals have appeared! Swapping portals teleports letters seamlessly. Trigger a combo!",
+    chineseDescription: "空间传送门悄悄浮现！处于底部的字母会从顶部落下，借此触发奇妙的多重连击吧！",
     layout: [
-      [1, 1, 0, 1, 1],
       [1, 1, 0, 1, 1],
       [1, 1, 1, 1, 1],
       [1, 1, 0, 1, 1],
+      [1, 1, 1, 1, 1],
       [1, 1, 0, 1, 1]
     ],
-    scoreGoal: 2605,
-    movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.16,
+    scoreGoal: 1400,
+    movesLimit: 18,
+    allowedLetters: ['A', 'B', 'C', 'D'],
+    initialSpecialProbability: 0.18,
+    theme: 'river',
+    portals: [
+      { r1: 1, c1: 0, r2: 3, c2: 4 }
+    ],
     specialGoals: {
-      totalEliminations: 30,
       maxCombo: 2
     }
   },
   {
     id: 5,
-    name: "Diamond Vault",
-    chineseName: "钻石宝库",
-    description: "A diamond shape grid. Extreme matching restrictions. Use your special power letters wisely!",
-    chineseDescription: "精致的菱形古塔棋盘，由于周围边缘被遮盖，极其考验滑动手感与策略选择！",
+    name: "Secret Crags",
+    chineseName: "玄石峭壁",
+    description: "Durable stone blocks hide unknown letters beneath! Eliminate adjacent standard items to crack and reveal them.",
+    chineseDescription: "远古坚石挡住了角落！在玄石周围进行匹配消除，即可凿碎玄石，重新解封地块！",
     layout: [
-      [0, 1, 1, 1, 0],
+      [5, 1, 1, 1, 5],
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
       [1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 0]
+      [5, 1, 1, 1, 5]
     ],
-    scoreGoal: 3200,
-    movesLimit: 20,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    scoreGoal: 1600,
+    movesLimit: 18,
+    allowedLetters: ['A', 'B', 'C', 'D'],
     initialSpecialProbability: 0.18,
+    theme: 'river',
     specialGoals: {
-      totalEliminations: 32,
+      stoneCount: 4
+    }
+  },
+
+  // ==========================================
+  // MID-STAGES (6-13) - Theme: grassland / sky
+  // ==========================================
+  {
+    id: 6,
+    name: "Hourglass Channels",
+    chineseName: "流动沙漏",
+    description: "Narrow hourglass columns. Synthesize laser blasters vertically to clear blocks in style!",
+    chineseDescription: "中间收窄的经典沙漏布局。在狭小的一格沙漏洞口中制造纵向激光，可以让连锁爆炸流畅穿透！",
+    layout: [
+      [1, 1, 1, 1, 1],
+      [1, 1, 0, 1, 1],
+      [0, 1, 1, 1, 0],
+      [0, 1, 1, 1, 0],
+      [1, 1, 0, 1, 1],
+      [1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 2500,
+    movesLimit: 19,
+    allowedLetters: ['A', 'B', 'C', 'D'],
+    initialSpecialProbability: 0.20,
+    theme: 'river',
+    specialGoals: {
+      totalEliminations: 55,
       maxCombo: 2
     }
   },
   {
-    id: 6,
-    name: "Supernova Glid",
-    chineseName: "超新星核心",
-    description: "Giant irregular board. Ice blocks and stones everywhere. Triggers incredible high-combo chain reactions!",
-    chineseDescription: "多裂缝不规则棋盘，布满随机散落的核能冰墙。利用强大的连消产生高空物料崩塌！",
-    layout: [
-      [1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1],
-      [1, 1, 0, 0, 1, 1],
-      [1, 2, 1, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1]
-    ],
-    scoreGoal: 4200,
-    movesLimit: 24,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.20,
-    specialGoals: {
-      iceCount: 4,
-      totalEliminations: 36,
-      maxCombo: 3
-    }
-  },
-  {
     id: 7,
-    name: "Sparking Trails",
-    chineseName: "火花轨迹",
-    description: "Symmetrical icy columns frame the board. Clear the glaciers to release maximum space!",
-    chineseDescription: "对称型冰河轨道。两个外立柱覆盖着重冰封印，想方设法轰开障碍扩大战场！",
+    name: "Frozen Meadow",
+    chineseName: "草野坚冰",
+    description: "Double Ice layers present! These thick slabs require two matches - on or adjacent - to fully clear.",
+    chineseDescription: "高难度的【双层冰块】全新登场！它们散发着深色寒芒，需要进行两次消除才能完全融化！",
     layout: [
-      [2, 1, 1, 1, 2],
-      [2, 1, 1, 1, 2],
-      [2, 1, 1, 1, 2],
-      [2, 1, 1, 1, 2],
-      [2, 1, 1, 1, 2]
+      [1, 1, 1, 1, 1],
+      [1, 3, 3, 3, 1],
+      [1, 3, 1, 3, 1],
+      [1, 3, 3, 3, 1],
+      [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 4800,
+    scoreGoal: 2800,
     movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.18,
+    initialSpecialProbability: 0.20,
+    theme: 'grassland',
     specialGoals: {
-      iceCount: 10,
-      totalEliminations: 40,
-      maxCombo: 3
+      iceCount: 8,
+      totalEliminations: 65
     }
   },
   {
     id: 8,
-    name: "Special Delivery",
-    chineseName: "特效漫天",
-    description: "Extremely high spawning rate of special tiles! Take absolute advantage of combining adjacent specials together!",
-    chineseDescription: "专供体验解压大连击的游乐场！中央留空，伴随着极高的高级炸弹出现机率！",
+    name: "Bento Joy",
+    chineseName: "缤纷野餐",
+    description: "A mixed tactical setup containing vines, stones and single frozen blocks. Stay alert!",
+    chineseDescription: "草地上丰盛的野餐盘，布满了落单的藤蔓、神秘的玄石和晶亮坚冰。需要精心观察每一步！",
     layout: [
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 0, 1, 1],
-      [1, 1, 1, 1, 1],
+      [4, 1, 1, 1, 1],
+      [1, 5, 2, 5, 1],
+      [1, 2, 1, 2, 1],
+      [1, 5, 2, 5, 1],
+      [1, 1, 1, 1, 4],
       [1, 1, 1, 1, 1]
     ],
-    scoreGoal: 6000,
-    movesLimit: 20,
+    scoreGoal: 3200,
+    movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.25,
+    initialSpecialProbability: 0.22,
+    theme: 'grassland',
     specialGoals: {
-      totalEliminations: 45,
-      maxCombo: 3
+      iceCount: 4,
+      vinedCount: 2,
+      stoneCount: 4
     }
   },
   {
     id: 9,
-    name: "The Butterfly",
-    chineseName: "蝶翼迷踪",
-    description: "Symmetrical winged chessboard. Outer edges are frozen. Break through the wings!",
-    chineseDescription: "精致的蝴蝶蝶翼双侧棋盘。蝴蝶的四角和中枢带有坚硬霜层，在闪烁高光中逐级瓦解它们！",
+    name: "Crossroads Forest",
+    chineseName: "林中十字路",
+    description: "Symmetrical cross shape restricting options. Break the corner stones for space!",
+    chineseDescription: "神圣的林地十字街头。边缘有零星玄石护路。优先轰开玄石可以为您争取到最开阔的连锁战地！",
     layout: [
-      [1, 1, 0, 1, 1],
-      [1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1],
-      [0, 1, 2, 1, 0],
-      [1, 1, 0, 1, 1]
+      [0, 1, 1, 1, 1, 0],
+      [1, 5, 1, 1, 5, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 5, 1, 1, 5, 1],
+      [0, 1, 1, 1, 1, 0]
     ],
-    scoreGoal: 6800,
+    scoreGoal: 4000,
     movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.18,
+    initialSpecialProbability: 0.20,
+    theme: 'grassland',
     specialGoals: {
-      iceCount: 3,
-      totalEliminations: 40,
-      maxCombo: 3
+      stoneCount: 4,
+      totalEliminations: 60
     }
   },
   {
     id: 10,
-    name: "Hourglass Crisis",
-    chineseName: "时间沙漏",
-    description: "Very tight center funnel limits standard falls. Create vertical blasts to force a flow!",
-    chineseDescription: "沙漏形的极窄管道阻挡了大部分自然掉落，合成行爆破或十字黑洞能产生最棒的碎石流动！",
+    name: "Ivy Spiral",
+    chineseName: "藤叶迷宫",
+    description: "Vines spiral down, limiting vertical falls. Match adjacent to break their clutches!",
+    chineseDescription: "缠绕的常春藤在林中织成了一道螺旋。被困在其中的棋子动弹不得，巧用同色匹配解封它们！",
     layout: [
-      [1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 0],
-      [0, 1, 1, 1, 0],
-      [0, 1, 1, 1, 0],
-      [1, 1, 1, 1, 1]
+      [1, 1, 1, 1, 1, 1],
+      [1, 4, 4, 4, 4, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 4, 4, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 7200,
-    movesLimit: 18,
+    scoreGoal: 4600,
+    movesLimit: 23,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.16,
+    initialSpecialProbability: 0.22,
+    theme: 'grassland',
     specialGoals: {
-      totalEliminations: 38,
-      maxCombo: 3
+      vinedCount: 6,
+      totalEliminations: 70
     }
   },
   {
     id: 11,
-    name: "Frost Ring",
-    chineseName: "冰环试炼",
-    description: "Full outer frozen border! Create blasts at the center to shatter ice ring.",
-    chineseDescription: "外侧一整圈全部被坚韧极其厚重的冰块牢牢锁死！从棋盘核心制造炸药一举粉碎冰环阻挡！",
+    name: "Portal Garden",
+    chineseName: "幽谷传送站",
+    description: "Two distinct sets of spatial loops connected with gravity triggers. Watch where cells drop!",
+    chineseDescription: "林间空地上架设起两对超速传送环。棋子横跨半个棋盘进行大跳跃，触发一连串酣畅淋漓的消解！",
     layout: [
-      [2, 2, 2, 2, 2],
-      [2, 1, 1, 1, 2],
-      [2, 1, 0, 1, 2],
-      [2, 1, 1, 1, 2],
-      [2, 2, 2, 2, 2]
+      [1, 1, 1, 1, 1, 1],
+      [1, 3, 1, 1, 3, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 3, 1, 1, 3, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 8000,
+    scoreGoal: 5400,
     movesLimit: 24,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.18,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.24,
+    theme: 'grassland',
+    portals: [
+      { r1: 1, c1: 0, r2: 4, c2: 5 },
+      { r1: 1, c1: 5, r2: 4, c2: 0 }
+    ],
     specialGoals: {
-      iceCount: 14,
-      totalEliminations: 50,
-      maxCombo: 3
+      iceCount: 4,
+      maxCombo: 3,
+      totalEliminations: 75
     }
   },
   {
     id: 12,
-    name: "Stairway to Heaven",
-    chineseName: "步步高升",
-    description: "Redesigned ascending diagonal stairway pattern with stable pillars! Maximizes matches without visual stalemates.",
-    chineseDescription: "经典的斜角对角线阶梯城堡，加入了底部冰霜。收集指定的水果图案并激活大型引信！",
+    name: "Fortress Ruins",
+    chineseName: "古迹碎石",
+    description: "A large formation of stones blocks the central ring. Explode items near them to clear the path.",
+    chineseDescription: "破落的森林废墟中堆砌着大片未解的玄石堆！在周围大显身手消除它，露出底下的宝藏！",
     layout: [
-      [0, 0, 1, 1, 1],
-      [0, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 2, 2, 1]
+      [1, 1, 1, 1, 1, 1],
+      [1, 5, 5, 5, 5, 1],
+      [1, 5, 1, 1, 5, 1],
+      [1, 5, 1, 1, 5, 1],
+      [1, 5, 5, 5, 5, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 5000,
-    movesLimit: 18,
+    scoreGoal: 6200,
+    movesLimit: 22,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.15,
+    initialSpecialProbability: 0.22,
+    theme: 'grassland',
     specialGoals: {
-      letter: { 'C': 10, 'D': 10 },
-      totalEliminations: 45,
-      maxCombo: 3
+      stoneCount: 12
     }
   },
   {
     id: 13,
-    name: "Transient Fusion",
-    chineseName: "瞬态熔聚",
-    description: "Ice barriers protect a nuclear empty core. Combine starting specials to blast open the reactive chamber!",
-    chineseDescription: "高能核能能量环。中心带有留空和核晶冰保护，利用双重重力交换产生超新星裂变！",
+    name: "Meadow Bridges",
+    chineseName: "青草双桥",
+    description: "Double narrow vertical bridge columns. Create sideways blasters to reach out of isolated spaces!",
+    chineseDescription: "翠色原野上的双子天桥。狭窄的两列竖桥与主盆地孤立开来，用横向等离子激光穿透它！",
     layout: [
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 2, 0, 2, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1]
-    ],
-    scoreGoal: 9500,
-    movesLimit: 20,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.22,
-    specialGoals: {
-      iceCount: 2,
-      totalEliminations: 45,
-      maxCombo: 3
-    }
-  },
-  {
-    id: 14,
-    name: "Combo Heaven",
-    chineseName: "连消天堂",
-    description: "Highly reactive massive playground with only 4 letters allowed! Triggers magnificent endless cascade chain reactions!",
-    chineseDescription: "消除达人的解压乐园！5x5中等规格只包含4种基础类型图案，几乎每次交换都会触发超能连消！",
-    layout: [
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1]
-    ],
-    scoreGoal: 10000,
-    movesLimit: 20,
-    allowedLetters: ['A', 'B', 'C', 'D'],
-    initialSpecialProbability: 0.25,
-    specialGoals: {
-      totalEliminations: 60,
-      maxCombo: 4
-    }
-  },
-  {
-    id: 15,
-    name: "Ice Castle Siege",
-    chineseName: "攻占寒星堡",
-    description: "Top and bottom frozen ramparts defend the treasure. Break adjacent combinations to siege the fortress!",
-    chineseDescription: "坚不可摧的碎石堡垒，带有上下交替的冰晶防线。在开阔地蓄力爆破击溃一切！",
-    layout: [
-      [2, 0, 2, 0, 2],
-      [2, 1, 1, 1, 2],
-      [1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1],
-      [2, 2, 2, 2, 2]
-    ],
-    scoreGoal: 11000,
-    movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.20,
-    specialGoals: {
-      iceCount: 6,
-      totalEliminations: 50,
-      maxCombo: 3
-    }
-  },
-  {
-    id: 16,
-    name: "X-Reactor Cross",
-    chineseName: "极耀十字爆",
-    description: "A gorgeous X-shaped frozen blockade dividing the board! Shattering the diagonal shield causes massive cross-collapses!",
-    chineseDescription: "庞大的X对角光环冰墙，把棋盘整体切碎为四份！粉碎冰晶以激活连通的对角落差！",
-    layout: [
-      [2, 1, 1, 1, 1, 2],
-      [1, 2, 1, 1, 2, 1],
-      [1, 1, 2, 2, 1, 1],
-      [1, 1, 2, 2, 1, 1],
-      [1, 2, 1, 1, 2, 1],
-      [2, 1, 1, 1, 1, 2]
-    ],
-    scoreGoal: 12000,
-    movesLimit: 24,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.20,
-    specialGoals: {
-      iceCount: 12,
-      totalEliminations: 55,
-      maxCombo: 3
-    }
-  },
-  {
-    id: 17,
-    name: "Cosmic Channels",
-    chineseName: "星海跃迁道",
-    description: "Symmetrical pocket corridors linked by narrow gravity gates. Chain sideways blasters to swap matter instantly!",
-    chineseDescription: "由两端跃迁而来的平行通道。必须充分制造横向极光爆破或者炸弹去清理死角！",
-    layout: [
+      [1, 1, 0, 0, 1, 1],
+      [1, 1, 0, 0, 1, 1],
       [1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 2, 1],
-      [1, 0, 1, 1, 0, 1],
-      [1, 0, 1, 1, 0, 1],
-      [1, 2, 1, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1]
-    ],
-    scoreGoal: 13000,
-    movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.24,
-    specialGoals: {
-      iceCount: 4,
-      letter: { 'C': 10, 'D': 10 },
-      totalEliminations: 55,
-      maxCombo: 3
-    }
-  },
-  {
-    id: 18,
-    name: "Gold Sieve Trident",
-    chineseName: "淘冰黄金戟",
-    description: "Three thin vertical channels cascade into a wide base pool. Liquid layouts deliver superb dropping cascade feelings!",
-    chineseDescription: "黄金三叉戟布局。三道极深的垂直落差使碎料能产生极高能的连续重力撞击！",
-    layout: [
-      [1, 0, 1, 1, 0, 1],
-      [1, 0, 1, 1, 0, 1],
-      [1, 0, 1, 1, 0, 1],
       [1, 1, 1, 1, 1, 1],
       [1, 2, 2, 2, 2, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 14000,
-    movesLimit: 22,
+    scoreGoal: 7000,
+    movesLimit: 24,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.18,
+    initialSpecialProbability: 0.22,
+    theme: 'grassland',
     specialGoals: {
       iceCount: 4,
-      totalEliminations: 55,
-      maxCombo: 3
+      totalEliminations: 80
+    }
+  },
+
+  // ==========================================
+  // SKY WORLD LEVELS (14-19) - Theme: sky
+  // ==========================================
+  {
+    id: 14,
+    name: "Cumulus Castle",
+    chineseName: "积云冰堡",
+    description: "A circular layout wrapped in double ice columns floating high in the sky.",
+    chineseDescription: "外围布满厚重的双层冰层，只有制造超大规模炸弹才能彻底炸穿！",
+    layout: [
+      [3, 3, 3, 3, 3, 3],
+      [3, 1, 1, 1, 1, 3],
+      [3, 1, 1, 1, 1, 3],
+      [3, 1, 1, 1, 1, 3],
+      [3, 1, 1, 1, 1, 3],
+      [3, 3, 3, 3, 3, 3]
+    ],
+    scoreGoal: 8200,
+    movesLimit: 25,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.24,
+    theme: 'sky',
+    specialGoals: {
+      iceCount: 20
+    }
+  },
+  {
+    id: 15,
+    name: "Sky Diamonds",
+    chineseName: "天空之钻",
+    description: "Elegant diamond shaped level board. Blocked corners increase difficulty. Focus on building blasters!",
+    chineseDescription: "悬浮在无垠高空的菱形巨钻。被削去四个死角的设计让掉落更加湍急，试着合出多个特殊爆发吧！",
+    layout: [
+      [0, 0, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 0, 0]
+    ],
+    scoreGoal: 9500,
+    movesLimit: 21,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.25,
+    theme: 'sky',
+    specialGoals: {
+      totalEliminations: 90
+    }
+  },
+  {
+    id: 16,
+    name: "Windy Slopes",
+    chineseName: "风口藤林",
+    description: "Top rows are clear, but the bottom rows are blocked by dense ivy vines. Untangle the mess!",
+    chineseDescription: "大风口的密林一角。狂风刮落的棋子在底部被层层藤蔓纠缠。自上而下发动轰炸洗刷它们！",
+    layout: [
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [4, 4, 1, 1, 4, 4],
+      [1, 4, 4, 4, 4, 1],
+      [4, 1, 4, 4, 1, 4]
+    ],
+    scoreGoal: 10500,
+    movesLimit: 23,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.26,
+    theme: 'sky',
+    specialGoals: {
+      vinedCount: 14
+    }
+  },
+  {
+    id: 17,
+    name: "Mist Portal Loop",
+    chineseName: "迷雾星门",
+    description: "Portals interconnect across opposite columns! Swapping launches automatic long cascades.",
+    chineseDescription: "高空云雾缭绕中的量子对称传送圈！棋子可以跨越异次元，从左至右瞬移传送！",
+    layout: [
+      [1, 1, 1, 1, 1, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 0, 1, 1, 0, 1],
+      [1, 0, 1, 1, 0, 1],
+      [1, 2, 1, 1, 2, 1],
+      [1, 1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 12000,
+    movesLimit: 24,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.26,
+    theme: 'sky',
+    portals: [
+      { r1: 1, c1: 1, r2: 4, c2: 4 },
+      { r1: 1, c1: 4, r2: 4, c2: 1 }
+    ],
+    specialGoals: {
+      iceCount: 4,
+      totalEliminations: 100
+    }
+  },
+  {
+    id: 18,
+    name: "Ancient Stone Ring",
+    chineseName: "云端环石",
+    description: "Mysterious standing stones shield the center board. Demolish them to release high gravity falling cascades!",
+    chineseDescription: "云海中遗落的凯尔特环状玄石柱！用周围的三消逐个粉碎它们以开启惊人掉落！",
+    layout: [
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 5, 5, 1, 1],
+      [1, 5, 1, 1, 5, 1],
+      [1, 5, 1, 1, 5, 1],
+      [1, 1, 5, 5, 1, 1],
+      [1, 1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 13500,
+    movesLimit: 22,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.25,
+    theme: 'sky',
+    specialGoals: {
+      stoneCount: 8
     }
   },
   {
     id: 19,
-    name: "Infinity Loop Orbit",
-    chineseName: "时空无限环",
-    description: "Symmetric nested infinity layout tracking infinite flow. High strategic swapping maximizes incredible specials combinations!",
-    chineseDescription: "扭曲的莫比乌斯星轨。奇妙的多维重疊空位，考验您在复杂几何环路中的合击逻辑！",
+    name: "Nimbus Storm",
+    chineseName: "云霓雷暴",
+    description: "High probability of special items, but dual layers of double ice protect the scoring zone.",
+    chineseDescription: "虽然拥有极高的升级特效触发几率，但也需要融化两层厚如重铠的双重寒冰！",
+    layout: [
+      [1, 1, 1, 1, 1, 1],
+      [1, 3, 3, 3, 3, 1],
+      [1, 3, 1, 1, 3, 1],
+      [1, 3, 1, 1, 3, 1],
+      [1, 3, 3, 3, 3, 1],
+      [1, 1, 1, 1, 1, 1]
+    ],
+    scoreGoal: 15500,
+    movesLimit: 23,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
+    initialSpecialProbability: 0.28,
+    theme: 'sky',
+    specialGoals: {
+      iceCount: 12
+    }
+  },
+
+  // ==========================================
+  // STARRY END-STAGES (20-25) - Theme: starry
+  // ==========================================
+  {
+    id: 20,
+    name: "Stellar Constellation",
+    chineseName: "绚丽星座",
+    description: "A wide 7x6 map. Free of major blocks but with isolated corners. Perfect for cascading explosions!",
+    chineseDescription: "边缘点缀着微冰阻挡。最适合施展高超的级连技巧，引爆大片星座光芒！",
     layout: [
       [0, 1, 1, 1, 1, 0],
       [1, 1, 2, 2, 1, 1],
-      [1, 2, 0, 0, 2, 1],
-      [1, 2, 0, 0, 2, 1],
-      [1, 1, 2, 2, 1, 1],
-      [0, 1, 1, 1, 1, 0]
-    ],
-    scoreGoal: 15000,
-    movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.22,
-    specialGoals: {
-      iceCount: 8,
-      totalEliminations: 55,
-      maxCombo: 3
-    }
-  },
-  {
-    id: 20,
-    name: "Millennium Spark",
-    chineseName: "终极圣殿",
-    description: "The grand master level. Huge full grid with challenging goals and dual combination possibilities!",
-    chineseDescription: "千汇万状的终极盛典！中大规模的异形冰晶九重殿，尽情释放您的魔法黑洞绝技去通关吧！",
-    layout: [
-      [1, 1, 1, 1, 1, 1],
       [1, 2, 1, 1, 2, 1],
-      [1, 1, 1, 1, 1, 1],
-      [1, 1, 2, 2, 1, 1],
       [1, 2, 1, 1, 2, 1],
+      [1, 1, 2, 2, 1, 1],
+      [0, 1, 1, 1, 1, 0],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 20000,
+    scoreGoal: 18000,
     movesLimit: 26,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.22,
+    initialSpecialProbability: 0.25,
+    theme: 'starry',
     specialGoals: {
-      iceCount: 6,
-      totalEliminations: 70,
-      maxCombo: 4
+      iceCount: 8
     }
   },
   {
     id: 21,
-    name: "Gummy Bear Gardens",
-    chineseName: "软糖小镇",
-    description: "Fruity rows of candy blockages. Clear the icy garden to release sweet gummy specials!",
-    chineseDescription: "充满甜蜜气息的水果软糖小径。打破坚硬的霜层，让可爱的水果爆破美味蔓延！",
+    name: "Nebula Vault",
+    chineseName: "星云宝库",
+    description: "Symmetrical double-ice columns shield high values. Generate BOMB items to wipe them out!",
+    chineseDescription: "对称【双层坚冰柱】守在星云两端！用消除合成的超级炸弹可以一次震碎整片寒冰！",
     layout: [
-      [0, 1, 1, 1, 1, 0],
-      [1, 2, 1, 1, 2, 1],
       [1, 1, 1, 1, 1, 1],
+      [1, 3, 3, 3, 3, 1],
       [1, 1, 1, 1, 1, 1],
-      [1, 2, 1, 1, 2, 1],
-      [0, 1, 1, 1, 1, 0]
+      [1, 1, 3, 3, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 3, 3, 3, 3, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
     scoreGoal: 22000,
-    movesLimit: 25,
+    movesLimit: 26,
     allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.22,
+    initialSpecialProbability: 0.25,
+    theme: 'starry',
     specialGoals: {
-      iceCount: 4,
-      totalEliminations: 75,
-      maxCombo: 3
+      iceCount: 10
     }
   },
   {
     id: 22,
-    name: "Choco Mountain Peak",
-    chineseName: "巧克力之巅",
-    description: "High altitude chocolaty fun. Double-column frostings protect the precious high-sugar matches.",
-    chineseDescription: "高空大冒险！险峻的双翼冰霜夹道，需要在有限空间中寻找合成特殊棋子的绝妙时机！",
+    name: "Comet Trails",
+    chineseName: "彗星扫尾",
+    description: "Vines and stone traps border laser portals. Swap colors through portals to trigger endless stars cascade!",
+    chineseDescription: "四角散落着藤蔓和怪石保护传送阵口。跨越星门交换以激落漫天爆爽彗尾光点！",
     layout: [
-      [1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1],
-      [1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1]
+      [4, 1, 1, 1, 1, 4],
+      [1, 5, 1, 1, 5, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 5, 1, 1, 5, 1],
+      [4, 1, 1, 1, 1, 4],
+      [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 24000,
-    movesLimit: 24,
+    scoreGoal: 25000,
+    movesLimit: 25,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.25,
+    initialSpecialProbability: 0.28,
+    theme: 'starry',
+    portals: [
+      { r1: 1, c1: 0, r2: 5, c2: 5 }
+    ],
     specialGoals: {
-      iceCount: 6,
-      totalEliminations: 80,
-      letter: { 'A': 15, 'B': 15 }
+      vinedCount: 4,
+      stoneCount: 4
     }
   },
   {
     id: 23,
-    name: "Licorice Maze",
-    chineseName: "甘草甜迷宫",
-    description: "Winding corridors filled with slippery paths and icy traps.",
-    chineseDescription: "蜿蜒的甜香迷宫。四角与圆心的坚冰极具阻碍性，唯有激发神奇连击方能突围！",
+    name: "Cosmic Lattice",
+    chineseName: "星际晶格",
+    description: "Irregular diagonal splits blocking standard drops. Master portals to fill the gaps cleanly!",
+    chineseDescription: "星盘斜裂构成的格子空洞严重阻碍了掉落。借由内置传送门把空缺巧妙挪移填满！",
     layout: [
-      [2, 1, 0, 0, 1, 2],
+      [1, 1, 0, 0, 1, 1],
       [1, 1, 1, 1, 1, 1],
-      [0, 1, 2, 2, 1, 0],
-      [0, 1, 2, 2, 1, 0],
+      [1, 2, 0, 0, 2, 1],
       [1, 1, 1, 1, 1, 1],
-      [2, 1, 0, 0, 1, 2]
+      [1, 2, 0, 0, 2, 1],
+      [1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 18000,
-    movesLimit: 20,
-    allowedLetters: ['B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.2,
+    scoreGoal: 28000,
+    movesLimit: 24,
+    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
+    initialSpecialProbability: 0.26,
+    theme: 'starry',
+    portals: [
+      { r1: 1, c1: 1, r2: 5, c2: 4 },
+      { r1: 1, c1: 4, r2: 5, c2: 1 }
+    ],
     specialGoals: {
-      iceCount: 8,
-      totalEliminations: 65,
-      maxCombo: 4
+      iceCount: 4,
+      maxCombo: 3
     }
   },
   {
     id: 24,
-    name: "Cotton Candy Clouds",
-    chineseName: "棉花糖浮云",
-    description: "Light fluffy challenge. Keep matching continuously to score high in the skies!",
-    chineseDescription: "松软微甜的粉红浮云。大面积开放式棋盘，为您合成豪华黑洞提供得天独厚的消除舞台！",
+    name: "Galactic Shield",
+    chineseName: "银河之盾",
+    description: "A defensive fortress made of stones and deep heavy ice. Clear the center to unlock cascading power!",
+    chineseDescription: "外侧布满神秘怪石和坚冰，只有爆破核心才能突破防御！",
     layout: [
-      [1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1]
+      [5, 5, 2, 2, 5, 5],
+      [5, 1, 1, 1, 1, 5],
+      [2, 1, 1, 1, 1, 2],
+      [2, 1, 1, 1, 1, 2],
+      [2, 1, 1, 1, 1, 2],
+      [5, 1, 1, 1, 1, 5],
+      [5, 5, 2, 2, 5, 5]
     ],
-    scoreGoal: 30000,
+    scoreGoal: 32000,
     movesLimit: 28,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.3,
+    initialSpecialProbability: 0.28,
+    theme: 'starry',
     specialGoals: {
-      totalEliminations: 95,
-      maxCombo: 5
+      iceCount: 10,
+      stoneCount: 8
     }
   },
   {
     id: 25,
-    name: "Marshmallow Bridges",
-    chineseName: "棉花糖双桥",
-    description: "Bridges of candies separated by water channels. Swap smartly across the divides.",
-    chineseDescription: "由香甜棉花糖连接的双子桥梁，中间是甜浆溪流，考验您跨越阻隔的非凡手艺！",
-    layout: [
-      [1, 1, 0, 1, 1],
-      [1, 2, 0, 2, 1],
-      [1, 1, 0, 1, 1],
-      [1, 2, 0, 2, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1]
-    ],
-    scoreGoal: 23000,
-    movesLimit: 23,
-    allowedLetters: ['A', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.18,
-    specialGoals: {
-      iceCount: 4,
-      totalEliminations: 70,
-      letter: { 'C': 18 }
-    }
-  },
-  {
-    id: 26,
-    name: "Ice Cream Citadel",
-    chineseName: "冰淇淋城堡",
-    description: "An ice-locked fortress of sweetness. Melt down the core to capture the high stars.",
-    chineseDescription: "坚不可摧的冰淇淋城堡！中心十字密布坚硬的冰层，您需要以包围之势粉碎所有障碍！",
-    layout: [
-      [1, 1, 2, 2, 1, 1],
-      [1, 1, 2, 2, 1, 1],
-      [2, 2, 1, 1, 2, 2],
-      [2, 2, 1, 1, 2, 2],
-      [1, 1, 2, 2, 1, 1],
-      [1, 1, 2, 2, 1, 1]
-    ],
-    scoreGoal: 25000,
-    movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.25,
-    specialGoals: {
-      iceCount: 12,
-      totalEliminations: 80,
-      letter: { 'D': 15, 'E': 15 }
-    }
-  },
-  {
-    id: 27,
-    name: "Soda Bubble Volcano",
-    chineseName: "苏打气泡火山",
-    description: "Volcanic chambers storing energetic carbonated candies. High drop speeds!",
-    chineseDescription: "咕嘟咕嘟冒泡的汽水火山。异形收窄的瓶口结构极易引发层层相叠的梦幻大连锁！",
-    layout: [
-      [0, 1, 1, 1, 0],
-      [0, 1, 2, 1, 0],
-      [1, 1, 2, 1, 1],
-      [1, 2, 1, 2, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1]
-    ],
-    scoreGoal: 27000,
-    movesLimit: 25,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.28,
-    specialGoals: {
-      iceCount: 4,
-      totalEliminations: 85,
-      maxCombo: 4
-    }
-  },
-  {
-    id: 28,
-    name: "Lollipop Carousel",
-    chineseName: "棒棒糖旋转木马",
-    description: "A revolving circle of icy tiles. Match on the perimeter or break the cozy core.",
-    chineseDescription: "欢快转动的棒棒糖木马！周围点缀着一圈透亮的星级冰壁，伴随着悦耳音乐爆破全场吧！",
-    layout: [
-      [2, 1, 1, 1, 1, 2],
-      [1, 0, 1, 1, 0, 1],
-      [1, 1, 2, 2, 1, 1],
-      [1, 1, 2, 2, 1, 1],
-      [1, 0, 1, 1, 0, 1],
-      [2, 1, 1, 1, 1, 2]
-    ],
-    scoreGoal: 26050,
-    movesLimit: 22,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E'],
-    initialSpecialProbability: 0.2,
-    specialGoals: {
-      iceCount: 8,
-      totalEliminations: 75,
-      letter: { 'A': 20 }
-    }
-  },
-  {
-    id: 29,
-    name: "Caramel Galaxy",
-    chineseName: "焦糖星云",
-    description: "A majestic cluster of rich coordinates resembling swirling starlight.",
-    chineseDescription: "深邃繁星汇聚的焦糖旋涡。巧妙阻挡的无重力悬空孔道，在浩瀚糖流里畅快爆破！",
+    name: "Supernova Chalice",
+    chineseName: "圣杯终章",
+    description: "The ultimate 7x7 custom array containing double-ice, ivy vines, portals and stones! Unleash magic combos to claim 3 stars!",
+    chineseDescription: "最终圣杯对决！冰裂、藤蔓、怪石、空间星门极致编排，在超大棋盘激发出终极满屏大消除吧！",
     layout: [
       [1, 1, 1, 1, 1, 1],
-      [1, 0, 2, 2, 0, 1],
-      [1, 2, 1, 1, 2, 1],
-      [1, 2, 1, 1, 2, 1],
-      [1, 0, 2, 2, 0, 1],
+      [1, 4, 3, 3, 4, 1],
+      [1, 3, 1, 1, 3, 1],
+      [1, 1, 5, 5, 1, 1],
+      [1, 3, 1, 1, 3, 1],
+      [1, 4, 3, 3, 4, 1],
       [1, 1, 1, 1, 1, 1]
     ],
-    scoreGoal: 32000,
-    movesLimit: 27,
+    scoreGoal: 40000,
+    movesLimit: 30,
     allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.3,
+    initialSpecialProbability: 0.32,
+    theme: 'starry',
+    portals: [
+      { r1: 0, c1: 0, r2: 6, c2: 5 },
+      { r1: 0, c1: 5, r2: 6, c2: 0 }
+    ],
     specialGoals: {
       iceCount: 8,
       totalEliminations: 100,
       maxCombo: 4
-    }
-  },
-  {
-    id: 30,
-    name: "Sweetness Grand Finale",
-    chineseName: "糖果圣杯终章",
-    description: "The ultimate 7x7 map with supreme combination mechanics and extreme goals.",
-    chineseDescription: "七彩斑斓的终极甜蜜交响乐！宏伟的7x7圣杯法阵中，冰霜满布，请释放您最顶尖的消除智慧！",
-    layout: [
-      [1, 1, 2, 1, 2, 1, 1],
-      [1, 2, 1, 1, 1, 2, 1],
-      [2, 1, 1, 2, 1, 1, 2],
-      [1, 1, 2, 0, 2, 1, 1],
-      [2, 1, 1, 2, 1, 1, 2],
-      [1, 2, 1, 1, 1, 2, 1],
-      [1, 1, 2, 1, 2, 1, 1]
-    ],
-    scoreGoal: 45000,
-    movesLimit: 32,
-    allowedLetters: ['A', 'B', 'C', 'D', 'E', 'F'],
-    initialSpecialProbability: 0.33,
-    specialGoals: {
-      iceCount: 16,
-      totalEliminations: 120,
-      maxCombo: 5,
-      letter: { 'A': 25, 'B': 25 }
     }
   }
 ];

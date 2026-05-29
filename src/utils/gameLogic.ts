@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GridCell, LevelConfig, Tile, Letter, SpecialEffect } from '../types';
+import { GridCell, LevelConfig, Tile, Letter, SpecialEffect, PortalPair } from '../types';
+
+export function isPortalCell(r: number, c: number, portals?: PortalPair[]): boolean {
+  if (!portals) return false;
+  return portals.some(p => (p.r1 === r && p.c1 === c) || (p.r2 === r && p.c2 === c));
+}
 
 // Helper to generate a unique random string for keys
 export function generateId(): string {
@@ -32,7 +37,7 @@ export function createInitialBoard(level: LevelConfig): GridCell[][] {
 
   for (let r = 0; r < R; r++) {
     for (let c = 0; c < C; c++) {
-      if (layout[r][c] === 0) {
+      if (layout[r][c] === 0 || isPortalCell(r, c, level.portals)) {
         board[r][c] = null;
         continue;
       }
@@ -59,12 +64,15 @@ export function createInitialBoard(level: LevelConfig): GridCell[][] {
         attempts++;
       }
 
-      // Check for locked state (Ice obstacle)
-      const isLocked = layout[r][c] === 2;
+      // Check for locked states and layout obstacles
+      const isLocked = layout[r][c] === 2 || layout[r][c] === 3;
+      const iceLevel = layout[r][c] === 3 ? 2 : (layout[r][c] === 2 ? 1 : 0);
+      const isVined = layout[r][c] === 4;
+      const isStone = layout[r][c] === 5;
 
       // Random starting special effects (HYPER_EXPLODER, ROW_BLASTER, COL_BLASTER)
       let special: SpecialEffect = 'NONE';
-      if (!isLocked && Math.random() < level.initialSpecialProbability * 0.60) {
+      if (!isLocked && !isVined && !isStone && Math.random() < level.initialSpecialProbability * 0.60) {
         const rand = Math.random();
         if (rand < 0.12) {
           special = 'HYPER_EXPLODER';
@@ -82,6 +90,9 @@ export function createInitialBoard(level: LevelConfig): GridCell[][] {
         letter,
         special,
         isLocked,
+        iceLevel,
+        isVined,
+        isStone,
         isNew: true
       };
     }
@@ -90,7 +101,7 @@ export function createInitialBoard(level: LevelConfig): GridCell[][] {
   // Ensure board has at least one valid move, otherwise shuffle
   let activeBoard = board;
   let shuffleAttempts = 0;
-  while (!checkPotentialMoves(activeBoard, layout) && shuffleAttempts < 10) {
+  while (!checkPotentialMoves(activeBoard, layout, level.portals) && shuffleAttempts < 10) {
     activeBoard = shuffleEntireBoardOnlyRandom(activeBoard, level);
     shuffleAttempts++;
   }
@@ -105,20 +116,54 @@ export function checkMatchAfterSwap(
   c1: number,
   r2: number,
   c2: number,
-  layout: number[][]
+  layout: number[][],
+  portals?: PortalPair[]
 ): boolean {
   const R = board.length;
   const C = board[0].length;
+
+  const isP1 = isPortalCell(r1, c1, portals);
+  const isP2 = isPortalCell(r2, c2, portals);
+
+  if (isP1 && isP2) return false;
 
   // Clone current board structure
   const tempBoard: GridCell[][] = board.map(row => 
     row.map(cell => cell ? { ...cell } : null)
   );
 
+  if (isP1 || isP2) {
+    // One is a portal swap!
+    const p_portal_r = isP1 ? r1 : r2;
+    const p_portal_c = isP1 ? c1 : c2;
+    const r1_orig = isP1 ? r2 : r1;
+    const c1_orig = isP1 ? c2 : c1;
+
+    const t1 = tempBoard[r1_orig][c1_orig];
+    if (!t1 || t1.isLocked || t1.isVined || t1.isStone) return false;
+
+    // Find partner portal coordinate
+    const pair = portals?.find(p => (p.r1 === p_portal_r && p.c1 === p_portal_c) || (p.r2 === p_portal_r && p.c2 === p_portal_c));
+    if (!pair) return false;
+
+    const rt = (p_portal_r === pair.r1 && p_portal_c === pair.c1) ? pair.r2 : pair.r1;
+    const ct = (p_portal_r === pair.r1 && p_portal_c === pair.c1) ? pair.c2 : pair.c1;
+
+    // Apply teleport swap within tempBoard
+    tempBoard[rt][ct] = { ...t1, row: rt, col: ct };
+    tempBoard[r1_orig][c1_orig] = null;
+    tempBoard[p_portal_r][p_portal_c] = null;
+
+    // Check if the teleport target (rt, ct) forms a match!
+    const matches = scanMatches(tempBoard, layout);
+    return matches.some(g => g.coords.some(coord => coord.r === rt && coord.c === ct));
+  }
+
+  // Normal Swap
   const t1 = tempBoard[r1][c1];
   const t2 = tempBoard[r2][c2];
 
-  if (!t1 || !t2 || t1.isLocked || t2.isLocked) return false;
+  if (!t1 || !t2 || t1.isLocked || t2.isLocked || t1.isVined || t2.isVined || t1.isStone || t2.isStone) return false;
 
   // Swap coordinates
   tempBoard[r1][c1] = { ...t2, row: r1, col: c1 };
@@ -145,7 +190,7 @@ export function hasAnyMatch(board: GridCell[][], layout: number[][]): boolean {
         const b0 = board[r][c];
         const b1 = board[r][c+1];
         const b2 = board[r][c+2];
-        if (b0 && b1 && b2 && b0.letter === b1.letter && b1.letter === b2.letter) {
+        if (b0 && b1 && b2 && !b0.isStone && !b1.isStone && !b2.isStone && b0.letter === b1.letter && b1.letter === b2.letter) {
           return true;
         }
       }
@@ -159,7 +204,7 @@ export function hasAnyMatch(board: GridCell[][], layout: number[][]): boolean {
         const b0 = board[r][c];
         const b1 = board[r+1][c];
         const b2 = board[r+2][c];
-        if (b0 && b1 && b2 && b0.letter === b1.letter && b1.letter === b2.letter) {
+        if (b0 && b1 && b2 && !b0.isStone && !b1.isStone && !b2.isStone && b0.letter === b1.letter && b1.letter === b2.letter) {
           return true;
         }
       }
@@ -170,25 +215,22 @@ export function hasAnyMatch(board: GridCell[][], layout: number[][]): boolean {
 }
 
 // Scans entire grid to find if there are ANY potential valid match-3 swaps.
-export function checkPotentialMoves(board: GridCell[][], layout: number[][]): boolean {
+export function checkPotentialMoves(board: GridCell[][], layout: number[][], portals?: PortalPair[]): boolean {
   const R = board.length;
   const C = board[0].length;
 
   for (let r = 0; r < R; r++) {
     for (let c = 0; c < C; c++) {
-      const tile = board[r][c];
-      if (!tile || tile.isLocked) continue;
-
       // Try swapping right
-      if (c + 1 < C && board[r][c + 1] && !board[r][c + 1]!.isLocked) {
-        if (checkMatchAfterSwap(board, r, c, r, c + 1, layout)) {
+      if (c + 1 < C) {
+        if (checkMatchAfterSwap(board, r, c, r, c + 1, layout, portals)) {
           return true;
         }
       }
 
       // Try swapping down
-      if (r + 1 < R && board[r + 1][c] && !board[r + 1][c]!.isLocked) {
-        if (checkMatchAfterSwap(board, r, c, r + 1, c, layout)) {
+      if (r + 1 < R) {
+        if (checkMatchAfterSwap(board, r, c, r + 1, c, layout, portals)) {
           return true;
         }
       }
@@ -198,26 +240,23 @@ export function checkPotentialMoves(board: GridCell[][], layout: number[][]): bo
 }
 
 // Scans and returns all possible swaps that lead to matches.
-export function findPotentialMoves(board: GridCell[][], layout: number[][]): { r1: number; c1: number; r2: number; c2: number }[] {
+export function findPotentialMoves(board: GridCell[][], layout: number[][], portals?: PortalPair[]): { r1: number; c1: number; r2: number; c2: number }[] {
   const R = board.length;
   const C = board[0].length;
   const moves: { r1: number; c1: number; r2: number; c2: number }[] = [];
 
   for (let r = 0; r < R; r++) {
     for (let c = 0; c < C; c++) {
-      const tile = board[r][c];
-      if (!tile || tile.isLocked) continue;
-
       // Try swapping right
-      if (c + 1 < C && board[r][c + 1] && !board[r][c + 1]!.isLocked) {
-        if (checkMatchAfterSwap(board, r, c, r, c + 1, layout)) {
+      if (c + 1 < C) {
+        if (checkMatchAfterSwap(board, r, c, r, c + 1, layout, portals)) {
           moves.push({ r1: r, c1: c, r2: r, c2: c + 1 });
         }
       }
 
       // Try swapping down
-      if (r + 1 < R && board[r + 1][c] && !board[r + 1][c]!.isLocked) {
-        if (checkMatchAfterSwap(board, r, c, r + 1, c, layout)) {
+      if (r + 1 < R) {
+        if (checkMatchAfterSwap(board, r, c, r + 1, c, layout, portals)) {
           moves.push({ r1: r, c1: c, r2: r + 1, c2: c });
         }
       }
@@ -238,7 +277,7 @@ export function shuffleEntireBoard(board: GridCell[][], level: LevelConfig): Gri
     for (let r = 0; r < activeBoard.length; r++) {
       for (let c = 0; c < activeBoard[r].length; c++) {
         const cell = activeBoard[r][c];
-        if (cell && !cell.isLocked) {
+        if (cell && !cell.isLocked && !cell.isVined && !cell.isStone) {
           movableTiles.push({ letter: cell.letter, special: cell.special });
         }
       }
@@ -257,7 +296,7 @@ export function shuffleEntireBoard(board: GridCell[][], level: LevelConfig): Gri
     for (let r = 0; r < activeBoard.length; r++) {
       for (let c = 0; c < activeBoard[r].length; c++) {
         const cell = activeBoard[r][c];
-        if (cell && !cell.isLocked) {
+        if (cell && !cell.isLocked && !cell.isVined && !cell.isStone) {
           cell.letter = movableTiles[listIdx].letter;
           cell.special = movableTiles[listIdx].special;
           listIdx++;
@@ -267,7 +306,7 @@ export function shuffleEntireBoard(board: GridCell[][], level: LevelConfig): Gri
 
     // Check if this shuffle avoids direct matches but permits potential moves
     const matchFree = !hasAnyMatch(activeBoard, layout);
-    const hasMove = checkPotentialMoves(activeBoard, layout);
+    const hasMove = checkPotentialMoves(activeBoard, layout, level.portals);
     if (matchFree && hasMove) {
       break;
     }
@@ -311,7 +350,7 @@ export function scanMatches(board: GridCell[][], layout: number[][]): MatchGroup
     let c = 0;
     while (c < C) {
       const tile = board[r][c];
-      if (!tile || layout[r][c] === 0) {
+      if (!tile || layout[r][c] === 0 || tile.isStone) {
         c++;
         continue;
       }
@@ -320,7 +359,7 @@ export function scanMatches(board: GridCell[][], layout: number[][]): MatchGroup
       let nextCol = c + 1;
       while (nextCol < C && layout[r][nextCol] !== 0) {
         const nextTile = board[r][nextCol];
-        if (nextTile && nextTile.letter === tile.letter) {
+        if (nextTile && !nextTile.isStone && nextTile.letter === tile.letter) {
           matchCoords.push({ r, c: nextCol });
           nextCol++;
         } else {
@@ -346,7 +385,7 @@ export function scanMatches(board: GridCell[][], layout: number[][]): MatchGroup
     let r = 0;
     while (r < R) {
       const tile = board[r][c];
-      if (!tile || layout[r][c] === 0) {
+      if (!tile || layout[r][c] === 0 || tile.isStone) {
         r++;
         continue;
       }
@@ -355,7 +394,7 @@ export function scanMatches(board: GridCell[][], layout: number[][]): MatchGroup
       let nextRow = r + 1;
       while (nextRow < R && layout[nextRow][c] !== 0) {
         const nextTile = board[nextRow][c];
-        if (nextTile && nextTile.letter === tile.letter) {
+        if (nextTile && !nextTile.isStone && nextTile.letter === tile.letter) {
           matchCoords.push({ r: nextRow, c });
           nextRow++;
         } else {
@@ -640,6 +679,8 @@ export function triggerExplosions(
 ): {
   finalEliminated: { r: number; c: number; actionTriggered: SpecialEffect; letter: Letter }[];
   iceBrokenCount: number;
+  vinedClearedCount: number;
+  stoneClearedCount: number;
 } {
   const R = board.length;
   const C = board[0].length;
@@ -649,6 +690,8 @@ export function triggerExplosions(
   const queue: { r: number; c: number; trigger: SpecialEffect }[] = [];
   const finalEliminated: { r: number; c: number; actionTriggered: SpecialEffect; letter: Letter }[] = [];
   let iceBrokenCount = 0;
+  let vinedClearedCount = 0;
+  let stoneClearedCount = 0;
 
   // Enqueue initial matches
   for (const coord of startCoords) {
@@ -677,7 +720,13 @@ export function triggerExplosions(
       letter: tile.letter
     });
 
-    // Check adjacent cells for frozen ice blocker layers
+    // Dissolve vine of the exploding tile itself
+    if (tile.isVined) {
+      tile.isVined = false;
+      vinedClearedCount++;
+    }
+
+    // Check adjacent cells for frozen ice blocker layers or stone blockers or vines
     const directions = [
       [-1, 0], [1, 0], [0, -1], [0, 1]
     ];
@@ -686,10 +735,29 @@ export function triggerExplosions(
       const nc = current.c + dc;
       if (nr >= 0 && nr < R && nc >= 0 && nc < C) {
         const neighbor = board[nr][nc];
-        if (neighbor && neighbor.isLocked) {
-          // Break its ice!
-          neighbor.isLocked = false;
-          iceBrokenCount++;
+        if (neighbor) {
+          // A. Crack / Reveal Stone
+          if (neighbor.isStone) {
+            neighbor.isStone = false;
+            neighbor.isNew = true; // Trigger reveal spark
+            stoneClearedCount++;
+          }
+          // B. Shatter Ice (handles double ice layer)
+          else if (neighbor.isLocked) {
+            if (neighbor.iceLevel === 2) {
+              neighbor.iceLevel = 1;
+              iceBrokenCount++;
+            } else {
+              neighbor.isLocked = false;
+              neighbor.iceLevel = 0;
+              iceBrokenCount++;
+            }
+          }
+          // C. Dissolve neighboring vine
+          else if (neighbor.isVined) {
+            neighbor.isVined = false;
+            vinedClearedCount++;
+          }
         }
       }
     }
@@ -755,21 +823,40 @@ export function triggerExplosions(
     
     // Also if the matched cell is actually frozen, unfreeze it!
     if (tile.isLocked) {
-      tile.isLocked = false;
-      iceBrokenCount++;
+      if (tile.iceLevel === 2) {
+        tile.iceLevel = 1;
+        iceBrokenCount++;
+      } else {
+        tile.isLocked = false;
+        tile.iceLevel = 0;
+        iceBrokenCount++;
+      }
+    }
+    // Dissolve vine if matched
+    if (tile.isVined) {
+      tile.isVined = false;
+      vinedClearedCount++;
+    }
+    // Break stone if matched
+    if (tile.isStone) {
+      tile.isStone = false;
+      stoneClearedCount++;
     }
   }
 
   return {
     finalEliminated,
-    iceBrokenCount
+    iceBrokenCount,
+    vinedClearedCount,
+    stoneClearedCount
   };
 }
 
 // Slide remaining blocks down, and generate falling ones from top
 export function applyGravityAndSpawn(
   board: GridCell[][],
-  level: LevelConfig
+  level: LevelConfig,
+  noSpecialSpawns?: boolean
 ): {
   newBoard: GridCell[][];
   spawnedCount: number;
@@ -793,12 +880,12 @@ export function applyGravityAndSpawn(
     const movablePieces: Tile[] = [];
 
     for (let r = 0; r < R; r++) {
-      if (layout[r][c] !== 0) {
+      if (layout[r][c] !== 0 && !isPortalCell(r, c, level.portals)) {
         playableRows.push(r);
         const cell = newBoard[r][c];
         if (cell) {
-          // If locked, it cannot move, so keep it in place
-          if (cell.isLocked) {
+          // If locked, vined, or rocky, it cannot move, so keep it in place
+          if (cell.isLocked || cell.isVined || cell.isStone) {
             // Take this row OUT of movable items list
             playableRows.pop();
             continue;
@@ -825,7 +912,7 @@ export function applyGravityAndSpawn(
         let special: SpecialEffect = 'NONE';
         
         // Dynamic spawn specials
-        if (Math.random() < level.initialSpecialProbability * 0.55) {
+        if (!noSpecialSpawns && Math.random() < level.initialSpecialProbability * 0.55) {
           const rand = Math.random();
           if (rand < 0.12) special = 'HYPER_EXPLODER';
           else if (rand < 0.60) special = 'ROW_BLASTER';

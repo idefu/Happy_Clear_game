@@ -63,11 +63,17 @@ export default function LevelSelector({
     const totalLevels = Array.isArray(levels) ? levels.length : 0;
     if (totalLevels === 0) return 1;
 
+    let storageUnlocked = 1;
+    try {
+      const saved = localStorage.getItem('alphabet_match_unlocked_level');
+      if (saved) storageUnlocked = parseInt(saved, 10) || 1;
+    } catch {}
+
     let highest = 1;
     for (const lvl of levels) {
       const isFirst = lvl.id === 1;
       const prevLevelCompleted = highScores[lvl.id - 1] !== undefined && highScores[lvl.id - 1] > 0;
-      if (isFirst || prevLevelCompleted) {
+      if (isFirst || prevLevelCompleted || lvl.id <= storageUnlocked) {
         highest = lvl.id;
       }
     }

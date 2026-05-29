@@ -24,6 +24,7 @@ export default function App() {
   const [activeLevel, setActiveLevel] = useState<LevelConfig | null>(null);
   const currentLevelRef = useRef<LevelConfig | null>(null);
   currentLevelRef.current = activeLevel;
+  const gameRunIdRef = useRef<number>(0);
 
   // Sound settings
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -56,11 +57,15 @@ export default function App() {
     totalEliminations: number;
     maxComboAchieved: number;
     letterClearedCount: { [key in Letter]?: number };
+    vinedCleared: number;
+    stoneCleared: number;
   }>({
     iceCleared: 0,
     totalEliminations: 0,
     maxComboAchieved: 0,
-    letterClearedCount: {}
+    letterClearedCount: {},
+    vinedCleared: 0,
+    stoneCleared: 0
   });
 
   // Display reshuffling alert banner
@@ -116,6 +121,7 @@ export default function App() {
 
   // Launch a selected level and configure starting layout
   const handleSelectLevel = (levelId: number) => {
+    gameRunIdRef.current += 1;
     const targetLvl = LEVELS.find(l => l.id === levelId) || LEVELS[0];
     setActiveLevel(targetLvl);
 
@@ -136,7 +142,9 @@ export default function App() {
       iceCleared: 0,
       totalEliminations: 0,
       maxComboAchieved: 0,
-      letterClearedCount: {}
+      letterClearedCount: {},
+      vinedCleared: 0,
+      stoneCleared: 0
     });
   };
 
@@ -158,7 +166,9 @@ export default function App() {
     iceCountCleared: number,
     totalEliminationsCleared: number,
     maxComboAchieved: number,
-    letterClearsMap: { [key in Letter]?: number }
+    letterClearsMap: { [key in Letter]?: number },
+    vinedCountCleared: number,
+    stoneCountCleared: number
   ): boolean => {
     if (!activeLevel) return false;
 
@@ -181,6 +191,14 @@ export default function App() {
         if (maxComboAchieved < goals.maxCombo) return false;
       }
 
+      if (goals.vinedCount !== undefined) {
+        if (vinedCountCleared < goals.vinedCount) return false;
+      }
+
+      if (goals.stoneCount !== undefined) {
+        if (stoneCountCleared < goals.stoneCount) return false;
+      }
+
       if (goals.letter) {
         for (const letKey in goals.letter) {
           const lTyped = letKey as Letter;
@@ -198,11 +216,13 @@ export default function App() {
   const handleAutoReshuffle = async (currentBoard: GridCell[][]) => {
     if (!activeLevel) return;
     const initialLevelId = activeLevel.id;
+    const currentRunId = gameRunIdRef.current;
     setIsAnimating(true);
     setShowShuffleToast(true);
     sound.playShuffle();
     
     await sleep(1500); // Allow player to read instructions banner
+    if (gameRunIdRef.current !== currentRunId) return;
     if (!currentLevelRef.current || currentLevelRef.current.id !== initialLevelId) return;
 
     if (activeLevel) {
@@ -215,32 +235,64 @@ export default function App() {
   };
 
   // Evaluating post-cascade state for victory/defeat
-  const evaluateEndGameStatus = (
+  const evaluateEndGameStatus = async (
     movesLeft: number,
     finalScore: number,
     iceCountCleared: number,
     totalEliminationsCleared: number,
     maxComboAchieved: number,
     letterClearsMap: { [key in Letter]?: number },
-    currentBoard: GridCell[][]
+    currentBoard: GridCell[][],
+    vinedCountCleared: number = goalsProgress.vinedCleared,
+    stoneCountCleared: number = goalsProgress.stoneCleared,
+    currentRunId?: number
   ) => {
     if (!activeLevel) return;
+    if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
 
-    const gameCompleted = checkIsGoalsCompleted(finalScore, iceCountCleared, totalEliminationsCleared, maxComboAchieved, letterClearsMap);
+    const gameCompleted = checkIsGoalsCompleted(
+      finalScore,
+      iceCountCleared,
+      totalEliminationsCleared,
+      maxComboAchieved,
+      letterClearsMap,
+      vinedCountCleared,
+      stoneCountCleared
+    );
 
     if (gameCompleted) {
-      sound.playLevelWin();
-      setIsWon(true);
-      setIsAnimating(false);
-
-      // Score bonus calculations
-      const leftOverMovesBonus = movesLeft * 200;
-      updateHighScore(activeLevel.id, finalScore + leftOverMovesBonus);
+      if (movesLeft > 0) {
+        // Trigger sugar-rush bonus round for unused moves!
+        runBonusPhase(
+          movesLeft,
+          currentBoard,
+          finalScore,
+          iceCountCleared,
+          totalEliminationsCleared,
+          maxComboAchieved,
+          letterClearsMap,
+          vinedCountCleared,
+          stoneCountCleared
+        );
+      } else {
+        setIsAnimating(true);
+        await sleep(1000); // 1s visual settle delay
+        if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
+        if (!currentLevelRef.current || currentLevelRef.current.id !== activeLevel.id) return;
+        sound.playLevelWin();
+        setIsWon(true);
+        setIsAnimating(false);
+        updateHighScore(activeLevel.id, finalScore);
+      }
       return;
     }
 
     // Out of moves - Game over
     if (movesLeft <= 0) {
+      setIsAnimating(true);
+      await sleep(1000); // 1s visual settle delay
+      if (currentRunId !== undefined && gameRunIdRef.current !== currentRunId) return;
+      if (!currentLevelRef.current || currentLevelRef.current.id !== activeLevel.id) return;
       sound.playLevelLose();
       setIsLost(true);
       setIsAnimating(false);
@@ -248,11 +300,200 @@ export default function App() {
     }
 
     // Moves left is OK, check if grid has deadlocks
-    if (!checkPotentialMoves(currentBoard, activeLevel.layout)) {
+    if (!checkPotentialMoves(currentBoard, activeLevel.layout, activeLevel.portals)) {
       handleAutoReshuffle(currentBoard);
     } else {
       setIsAnimating(false);
     }
+  };
+
+  // SUGAR RUSH PROGRESSIVE BONUS PHASE
+  const runBonusPhase = async (
+    movesLeft: number,
+    currentBoard: GridCell[][],
+    finalScore: number,
+    iceCountCleared: number,
+    totalEliminationsCleared: number,
+    maxComboAchieved: number,
+    letterClearsMap: { [key in Letter]?: number },
+    vinedCountCleared: number,
+    stoneCountCleared: number
+  ) => {
+    if (!activeLevel) return;
+    setIsAnimating(true);
+    let tempMoves = movesLeft;
+    let workingBoard = currentBoard.map(row => row.map(cell => cell ? { ...cell } : null));
+    let currentScoreVal = finalScore;
+    let localIceCleared = iceCountCleared;
+    let localTotalEliminations = totalEliminationsCleared;
+    let localMaxComboAchieved = maxComboAchieved;
+    const localLettersClearedMap = { ...letterClearsMap };
+    let localVinedCleared = vinedCountCleared;
+    let localStoneCleared = stoneCountCleared;
+    const levelId = activeLevel.id;
+
+    // Step A: Mark remaining moves as random items on the board sequentially
+    while (tempMoves > 0) {
+      const validPositions: { r: number; c: number }[] = [];
+      for (let r = 0; r < workingBoard.length; r++) {
+        for (let c = 0; c < workingBoard[r].length; c++) {
+          const cell = workingBoard[r][c];
+          if (cell && !cell.isLocked && !cell.isVined && !cell.isStone && cell.special === 'NONE') {
+            validPositions.push({ r, c });
+          }
+        }
+      }
+
+      if (validPositions.length === 0) break;
+
+      // Select a random coordinates slot
+      const randIdx = Math.floor(Math.random() * validPositions.length);
+      const { r, c } = validPositions[randIdx];
+
+      // Assign a random special effect
+      const specials: SpecialEffect[] = ['ROW_BLASTER', 'COL_BLASTER', 'BOMB', 'HYPER_EXPLODER'];
+      const chosenSpecial = specials[Math.floor(Math.random() * specials.length)];
+
+      workingBoard[r][c]!.special = chosenSpecial;
+      workingBoard[r][c]!.isNew = true; // highlight drop spark
+      setBoard(workingBoard.map(row => row.map(cell => cell ? { ...cell } : null)));
+      
+      tempMoves--;
+      setMovesRemaining(tempMoves);
+      sound.playSwap(); // popup slide chime sound
+      
+      await sleep(200); // 200ms sequential layout delay
+      if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+    }
+
+    // Step B: Sequentially detonate every special element until the board is completely clear
+    let continuesDetonating = true;
+    while (continuesDetonating) {
+      // Find specials currently present on the board
+      const specialsOnBoard: { r: number; c: number }[] = [];
+      for (let r = 0; r < workingBoard.length; r++) {
+        for (let c = 0; c < workingBoard[r].length; c++) {
+          const cell = workingBoard[r][c];
+          if (cell && cell.special !== 'NONE') {
+            specialsOnBoard.push({ r, c });
+          }
+        }
+      }
+
+      if (specialsOnBoard.length === 0) {
+        continuesDetonating = false;
+        break;
+      }
+
+      // Detonate the first item
+      const startCoord = specialsOnBoard[0];
+      let comboCount = 0;
+      let isFirstExplosion = true;
+
+      while (isFirstExplosion || checkHasAnyActiveMatches(workingBoard)) {
+        const matchesInBonus = isFirstExplosion ? [] : scanMatches(workingBoard, activeLevel.layout);
+        isFirstExplosion = false;
+
+        // Process matches and specials
+        const { 
+          newBoard: boardWithUpgrades, 
+          eliminatedCoords,
+          blastersCreatedCount,
+          hyperExplodersCreatedCount
+        } = processMatchesAndGenerateSpecials(workingBoard, matchesInBonus, null);
+
+        let initialExplodeCoords = [...eliminatedCoords];
+        if (comboCount === 0) {
+          initialExplodeCoords.push(startCoord); // include starter cue
+        }
+
+        const { finalEliminated, iceBrokenCount, vinedClearedCount, stoneClearedCount } = triggerExplosions(boardWithUpgrades, initialExplodeCoords, activeLevel.layout);
+
+        localIceCleared += iceBrokenCount;
+        localVinedCleared += vinedClearedCount;
+        localStoneCleared += stoneClearedCount;
+        if (iceBrokenCount > 0) {
+          sound.playIceShatter();
+        }
+
+        localTotalEliminations += finalEliminated.length;
+        finalEliminated.forEach(pe => {
+          localLettersClearedMap[pe.letter] = (localLettersClearedMap[pe.letter] || 0) + 1;
+          
+          if (pe.actionTriggered === 'ROW_BLASTER' || pe.actionTriggered === 'COL_BLASTER') {
+            sound.playLaserBlast();
+          } else if (pe.actionTriggered === 'HYPER_EXPLODER' || pe.actionTriggered === 'BOMB') {
+            sound.playHyperExplode();
+          }
+        });
+
+        // Cumulative bonus scoring increments
+        let waveBonusPoints = 0;
+        finalEliminated.forEach(pe => {
+          let val = 120 * (1 + comboCount * 0.4);
+          if (pe.actionTriggered === 'ROW_BLASTER' || pe.actionTriggered === 'COL_BLASTER') {
+            val += 50;
+          } else if (pe.actionTriggered === 'HYPER_EXPLODER') {
+            val += 150;
+          } else if (pe.actionTriggered === 'BOMB') {
+            val += 120;
+          }
+          waveBonusPoints += val;
+        });
+
+        waveBonusPoints += iceBrokenCount * 250;
+        currentScoreVal += Math.floor(waveBonusPoints);
+
+        const transitionTagBoard = boardWithUpgrades.map(row => row.map(cell => cell ? { ...cell } : null));
+        const deletionWaveArr: typeof deletedPoints = [];
+
+        finalEliminated.forEach(pe => {
+          const cell = transitionTagBoard[pe.r][pe.c];
+          if (cell) cell.isEliminating = true;
+          deletionWaveArr.push({ r: pe.r, c: pe.c, actionTriggered: pe.actionTriggered, letter: pe.letter });
+        });
+
+        setBoard(transitionTagBoard);
+        setDeletedPoints(deletionWaveArr);
+        sound.playMatch(comboCount);
+        setScore(currentScoreVal);
+
+        setGoalsProgress({
+          iceCleared: localIceCleared,
+          totalEliminations: localTotalEliminations,
+          maxComboAchieved: Math.max(localMaxComboAchieved, comboCount + 1),
+          letterClearedCount: localLettersClearedMap,
+          vinedCleared: localVinedCleared,
+          stoneCleared: localStoneCleared
+        });
+
+        await sleep(250); // visual shrinkage delay
+        if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+
+        const boardWithEmptyNulls = transitionTagBoard.map(row =>
+          row.map(cell => (cell && cell.isEliminating ? null : cell))
+        );
+
+        const { newBoard: boardWithGravitySlide } = applyGravityAndSpawn(boardWithEmptyNulls, activeLevel, true);
+        workingBoard = boardWithGravitySlide;
+        setBoard(boardWithGravitySlide);
+        setDeletedPoints([]);
+
+        await sleep(350); // visual drop/fall layout delay
+        if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+
+        comboCount++;
+      }
+    }
+
+    // Done detonating, let the final state settle beautifully for 1.2s before displaying the win panel
+    await sleep(1200);
+    if (!currentLevelRef.current || currentLevelRef.current.id !== levelId) return;
+
+    sound.playLevelWin();
+    setIsWon(true);
+    setIsAnimating(false);
+    updateHighScore(levelId, currentScoreVal);
   };
 
   // ASYMMETRIC CASCADING SOLVER LOOP
@@ -269,6 +510,42 @@ export default function App() {
     // Reapply coordinates
     workingBoard[r1][c1] = { ...t2, row: r1, col: c1 };
     workingBoard[r2][c2] = { ...t1, row: r2, col: c2 };
+
+    // Portal travel teleport substitution
+    if (activeLevel.portals && activeLevel.portals.length > 0) {
+      for (const pair of activeLevel.portals) {
+        const isP1 = (r1 === pair.r1 && c1 === pair.c1);
+        const isP2 = (r2 === pair.r2 && c2 === pair.c2);
+
+        let portalCoord: {r: number, c: number} | null = null;
+        let partnerCoord: {r: number, c: number} | null = null;
+        let targetCoord: {r: number, c: number} | null = null;
+
+        if (isP1 && !isP2) {
+          portalCoord = { r: r1, c: c1 };
+          partnerCoord = { r: pair.r2, c: pair.c2 };
+          targetCoord = { r: r2, c: c2 };
+        } else if (isP2 && !isP1) {
+          portalCoord = { r: r2, c: c2 };
+          partnerCoord = { r: pair.r1, c: pair.c1 };
+          targetCoord = { r: r1, c: c1 };
+        }
+
+        if (portalCoord && partnerCoord && targetCoord) {
+          // Teleport neighbor tile!
+          const tileToTeleport = workingBoard[portalCoord.r][portalCoord.c];
+          const partnerTile = workingBoard[partnerCoord.r][partnerCoord.c];
+          
+          if (tileToTeleport && partnerTile) {
+            workingBoard[partnerCoord.r][partnerCoord.c] = { ...tileToTeleport, row: partnerCoord.r, col: partnerCoord.c };
+            workingBoard[portalCoord.r][portalCoord.c] = { ...partnerTile, row: portalCoord.r, col: portalCoord.c };
+            sound.playLaserBlast(); // Space travel teleport sound
+          }
+          break;
+        }
+      }
+    }
+
     setBoard(workingBoard);
     sound.playSwap();
 
@@ -304,6 +581,8 @@ export default function App() {
     let localTotalEliminations = goalsProgress.totalEliminations;
     let localMaxComboAchieved = goalsProgress.maxComboAchieved;
     const localLettersClearedMap = { ...goalsProgress.letterClearedCount };
+    let localVinedCleared = goalsProgress.vinedCleared;
+    let localStoneCleared = goalsProgress.stoneCleared;
 
     // Set which cell is the primary upgraded receiver cell (from user initial swipe path)
     let swapCoordsToUpgrade: { r1: number; c1: number; r2: number; c2: number } | null = { r1, c1, r2, c2 };
@@ -381,7 +660,7 @@ export default function App() {
       }
 
       // b. Resolve chain explosions (Row / Col Blasters and Color-bombs recursion!)
-      const { finalEliminated, iceBrokenCount } = triggerExplosions(boardWithUpgrades, initialExplodeCoords, activeLevel.layout);
+      const { finalEliminated, iceBrokenCount, vinedClearedCount, stoneClearedCount } = triggerExplosions(boardWithUpgrades, initialExplodeCoords, activeLevel.layout);
 
       // Rule 5: If both row blaster and col blaster are triggered in this wave, award a BOMB
       const hadRowBlasterTriggered = finalEliminated.some(pe => pe.actionTriggered === 'ROW_BLASTER');
@@ -389,6 +668,8 @@ export default function App() {
       const shouldAwardBomb = hadRowBlasterTriggered && hadColBlasterTriggered;
 
       localIceCleared += iceBrokenCount;
+      localVinedCleared += vinedClearedCount;
+      localStoneCleared += stoneClearedCount;
       if (iceBrokenCount > 0) {
         sound.playIceShatter();
       }
@@ -444,7 +725,9 @@ export default function App() {
         iceCleared: localIceCleared,
         totalEliminations: localTotalEliminations,
         maxComboAchieved: localMaxComboAchieved,
-        letterClearedCount: localLettersClearedMap
+        letterClearedCount: localLettersClearedMap,
+        vinedCleared: localVinedCleared,
+        stoneCleared: localStoneCleared
       });
 
       await sleep(250); // wait for tiles shrink fadeout
@@ -511,7 +794,17 @@ export default function App() {
       
       // Delay status evaluation to let latest visuals finish
       setTimeout(() => {
-        evaluateEndGameStatus(remaining, currentScore, localIceCleared, localTotalEliminations, localMaxComboAchieved, localLettersClearedMap, workingBoard);
+        evaluateEndGameStatus(
+          remaining, 
+          currentScore, 
+          localIceCleared, 
+          localTotalEliminations, 
+          localMaxComboAchieved, 
+          localLettersClearedMap, 
+          workingBoard,
+          localVinedCleared,
+          localStoneCleared
+        );
       }, 80);
 
       return remaining;
@@ -537,8 +830,27 @@ export default function App() {
     }
   };
 
+  // Dynamic Background solver matching Rivers, Grasslands, Skies, and Starry Skies
+  const getDynamicBackgroundClasses = () => {
+    if (!activeLevel) {
+      return "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950";
+    }
+    switch (activeLevel.theme) {
+      case 'river':
+        return "bg-gradient-to-b from-slate-950 via-cyan-950/40 to-slate-950";
+      case 'grassland':
+        return "bg-gradient-to-b from-slate-950 via-emerald-950/30 to-slate-950";
+      case 'sky':
+        return "bg-gradient-to-b from-slate-950 via-sky-950/30 to-slate-950";
+      case 'starry':
+        return "bg-gradient-to-b from-slate-950 via-purple-950/45 to-slate-950";
+      default:
+        return "bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950";
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans relative antialiased bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className={`min-h-screen text-slate-100 flex flex-col font-sans relative antialiased transition-all duration-1000 ${getDynamicBackgroundClasses()} selection:bg-indigo-500/30 selection:text-indigo-200`}>
       
       {/* Absolute background visual ambient details */}
       <div className="absolute top-0 left-0 right-0 h-96 bg-gradient-to-b from-indigo-950/20 via-slate-900/0 to-slate-950/0 pointer-events-none" />

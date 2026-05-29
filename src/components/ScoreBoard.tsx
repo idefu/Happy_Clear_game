@@ -36,6 +36,8 @@ interface ScoreBoardProps {
     totalEliminations: number;
     maxComboAchieved: number;
     letterClearedCount: { [key in Letter]?: number };
+    vinedCleared: number;
+    stoneCleared: number;
   };
   isIceHighlighted?: boolean;
   soundEnabled: boolean;
@@ -59,7 +61,7 @@ export default function ScoreBoard({
   onIceGoalClick,
   children
 }: ScoreBoardProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   // Score percentage representing energy filling up standard
   const scorePercent = Math.min(100, Math.floor((score / level.scoreGoal) * 100));
 
@@ -136,8 +138,28 @@ export default function ScoreBoard({
               {level.specialGoals?.maxCombo !== undefined && (
                 <div className="flex items-center justify-between w-full p-2.5 rounded-2xl border-2 border-purple-500/20 bg-slate-950/70">
                   <span className="text-xs font-black text-purple-300">{t('comboCountMetric')}</span>
-                  <span className={`font-sans font-black text-sm lg:text-base ${goalsProgress.maxComboAchieved >= level.specialGoals.maxCombo ? 'text-emerald-450' : 'text-amber-300'}`}>
+                  <span className={`font-sans font-black text-sm lg:text-base ${goalsProgress.maxComboAchieved >= level.specialGoals.maxCombo ? 'text-emerald-400' : 'text-amber-300'}`}>
                     {goalsProgress.maxComboAchieved}/{level.specialGoals.maxCombo}
+                  </span>
+                </div>
+              )}
+
+              {/* Vines target */}
+              {level.specialGoals?.vinedCount !== undefined && (
+                <div className="flex items-center justify-between w-full p-2.5 rounded-2xl border-2 border-emerald-500/20 bg-slate-950/70">
+                  <span className="text-[13px] font-black text-emerald-300">🌿 {language === 'zh' ? '解封藤蔓' : 'Vines'}</span>
+                  <span className={`font-sans font-black text-sm lg:text-base ${goalsProgress.vinedCleared >= level.specialGoals.vinedCount ? 'text-emerald-400' : 'text-emerald-300'}`}>
+                    {goalsProgress.vinedCleared}/{level.specialGoals.vinedCount}
+                  </span>
+                </div>
+              )}
+
+              {/* Stones target */}
+              {level.specialGoals?.stoneCount !== undefined && (
+                <div className="flex items-center justify-between w-full p-2.5 rounded-2xl border-2 border-slate-500/20 bg-slate-950/70">
+                  <span className="text-[13px] font-black text-slate-300">🪨 {language === 'zh' ? '粉碎击破' : 'Stones'}</span>
+                  <span className={`font-sans font-black text-sm lg:text-base ${goalsProgress.stoneCleared >= level.specialGoals.stoneCount ? 'text-emerald-400' : 'text-slate-300'}`}>
+                    {goalsProgress.stoneCleared}/{level.specialGoals.stoneCount}
                   </span>
                 </div>
               )}
@@ -362,6 +384,26 @@ export default function ScoreBoard({
                   <span className="text-[9px] font-bold text-slate-400">{t('comboCountMetric')}</span>
                   <span className={`font-sans font-black text-xs ${goalsProgress.maxComboAchieved >= level.specialGoals.maxCombo ? 'text-emerald-400' : 'text-amber-300'}`}>
                     {goalsProgress.maxComboAchieved}/{level.specialGoals.maxCombo}
+                  </span>
+                </div>
+              )}
+
+              {/* Vines target */}
+              {level.specialGoals?.vinedCount !== undefined && (
+                <div className="flex items-center justify-between px-1.5 py-0.5 rounded-lg border-2 border-white/5 bg-slate-950/65">
+                  <span className="text-[9px] font-bold text-slate-400">🌿 {language === 'zh' ? '藤蔓' : 'Vines'}</span>
+                  <span className="font-sans font-black text-xs text-emerald-400">
+                    {goalsProgress.vinedCleared}/{level.specialGoals.vinedCount}
+                  </span>
+                </div>
+              )}
+
+              {/* Stones target */}
+              {level.specialGoals?.stoneCount !== undefined && (
+                <div className="flex items-center justify-between px-1.5 py-0.5 rounded-lg border-2 border-white/5 bg-slate-950/65">
+                  <span className="text-[9px] font-bold text-slate-400">🪨 {language === 'zh' ? '粉碎' : 'Stones'}</span>
+                  <span className="font-sans font-black text-xs text-slate-300">
+                    {goalsProgress.stoneCleared}/{level.specialGoals.stoneCount}
                   </span>
                 </div>
               )}

@@ -8,7 +8,7 @@ import { motion } from 'motion/react';
 import { GridCell, Tile, Letter, SpecialEffect, LevelConfig, Particle } from '../types';
 import { ShieldAlert, Zap, Compass, Star } from 'lucide-react';
 import sound from '../utils/sound';
-import { findPotentialMoves } from '../utils/gameLogic';
+import { findPotentialMoves, isPortalCell } from '../utils/gameLogic';
 
 import pic0 from '../../pic/0.png';
 import pic1 from '../../pic/1.png';
@@ -17,6 +17,25 @@ import pic3 from '../../pic/3.png';
 import pic4 from '../../pic/4.png';
 import pic5 from '../../pic/5.png';
 import pic6 from '../../pic/6.png';
+
+const portalStylesMap = [
+  {
+    bg: 'bg-purple-950/40 border-purple-500/60 shadow-[0_0_12px_rgba(168,85,247,0.4)]',
+    pulse: 'bg-purple-500/5 border-purple-400/45',
+  },
+  {
+    bg: 'bg-teal-950/40 border-teal-500/60 shadow-[0_0_12px_rgba(20,184,166,0.4)]',
+    pulse: 'bg-teal-500/5 border-teal-400/45',
+  },
+  {
+    bg: 'bg-pink-950/40 border-pink-500/60 shadow-[0_0_12px_rgba(244,63,94,0.4)]',
+    pulse: 'bg-pink-500/5 border-pink-400/45',
+  },
+  {
+    bg: 'bg-amber-950/40 border-amber-500/60 shadow-[0_0_12px_rgba(245,158,11,0.4)]',
+    pulse: 'bg-amber-500/5 border-amber-400/45',
+  }
+];
 
 interface GameBoardProps {
   board: GridCell[][];
@@ -319,11 +338,39 @@ export default function GameBoard({
 
   // Swapping core math logic
   const handleSwapTrigger = (r1: number, c1: number, r2: number, c2: number) => {
-    // Check if tiles exist, are adjacent, and are NOT ice locked
+    // Check if tiles exist, are adjacent, and are NOT locked/vined/rocky
     const t1 = board[r1]?.[c1];
     const t2 = board[r2]?.[c2];
 
-    if (!t1 || !t2 || t1.isLocked || t2.isLocked) {
+    const activeLevelPortals = level.portals;
+    const isP1 = isPortalCell(r1, c1, activeLevelPortals);
+    const isP2 = isPortalCell(r2, c2, activeLevelPortals);
+
+    if (isP1 || isP2) {
+      if (isP1 && isP2) {
+        sound.playBounce();
+        return;
+      }
+      
+      const movingTile = isP1 ? t2 : t1;
+      if (!movingTile || movingTile.isLocked || movingTile.isVined || movingTile.isStone) {
+        sound.playBounce();
+        return;
+      }
+
+      // Adjacency scan: row-diff and col-diff should sum to 1
+      const rowDiff = Math.abs(r1 - r2);
+      const colDiff = Math.abs(c1 - c2);
+
+      if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+        onSwap(r1, c1, r2, c2);
+      } else {
+        sound.playBounce();
+      }
+      return;
+    }
+
+    if (!t1 || !t2 || t1.isLocked || t2.isLocked || t1.isVined || t2.isVined || t1.isStone || t2.isStone) {
       sound.playBounce();
       return;
     }
@@ -362,7 +409,7 @@ export default function GameBoard({
 
       // 5 seconds of board-resting inactivity trigger
       if (idle >= 5000 && !hintCells) {
-        const moves = findPotentialMoves(board, level.layout);
+        const moves = findPotentialMoves(board, level.layout, level.portals);
         if (moves.length > 0) {
           // Select one potential move pairing
           setHintCells(moves[0]);
@@ -377,13 +424,34 @@ export default function GameBoard({
   const handleCellClick = (r: number, c: number) => {
     resetActivityTimer();
     if (isAnimating) return;
+
+    const activeLevelPortals = level.portals;
+    const isClickingPortal = isPortalCell(r, c, activeLevelPortals);
+
+    if (isClickingPortal) {
+      if (selectedCell) {
+        // Try swapping starting selected tile with this portal
+        const rowDiff = Math.abs(selectedCell.r - r);
+        const colDiff = Math.abs(selectedCell.c - c);
+        if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
+          handleSwapTrigger(selectedCell.r, selectedCell.c, r, c);
+        } else {
+          sound.playBounce();
+        }
+        setSelectedCell(null);
+      } else {
+        sound.playBounce();
+      }
+      return;
+    }
+
     const clickedTile = board[r]?.[c];
     if (!clickedTile || level.layout[r][c] === 0) return;
 
-    if (clickedTile.isLocked) {
+    if (clickedTile.isLocked || clickedTile.isVined || clickedTile.isStone) {
       sound.playBounce();
-      onIceClicked?.();
-      return; // Frozen cells cannot move
+      if (clickedTile.isLocked) onIceClicked?.();
+      return; // Frozen, vined, or rocky cells cannot move or highlight
     }
 
     if (!selectedCell) {
@@ -408,10 +476,10 @@ export default function GameBoard({
     const clickedTile = board[r]?.[c];
     if (!clickedTile || level.layout[r][c] === 0) return;
 
-    if (clickedTile.isLocked) {
+    if (clickedTile.isLocked || clickedTile.isVined || clickedTile.isStone) {
       sound.playBounce();
-      onIceClicked?.();
-      return; // Frozen cells cannot move
+      if (clickedTile.isLocked) onIceClicked?.();
+      return; // Frozen, vined, or rocky cells cannot move
     }
 
     dragStartRef.current = { r, c, x: clientX, y: clientY };
@@ -550,6 +618,10 @@ export default function GameBoard({
                 (hintCells.r2 === r && hintCells.c2 === c)
               );
 
+              const portalIndex = level.portals?.findIndex(p => (p.r1 === r && p.c1 === c) || (p.r2 === r && p.c2 === c)) ?? -1;
+              const hasPortal = portalIndex !== -1;
+              const portalStyle = hasPortal ? portalStylesMap[portalIndex % portalStylesMap.length] : null;
+
               if (isEmptyCell) {
                 // Out of bounds (renders completely hollow backspace spacer)
                 return (
@@ -572,10 +644,17 @@ export default function GameBoard({
                       ? 'bg-slate-800/80 ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-950 shadow-inner'
                       : isHinted
                       ? 'bg-slate-900 ring-2 sm:ring-4 ring-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.8)] border border-amber-300 z-10 animate-pulse'
+                      : hasPortal
+                      ? portalStyle!.bg
                       : 'bg-slate-900/40 border border-slate-800/60'
                   }`}
                   id={`board-cell-${r}-${c}`}
                 >
+                  {/* Space Portal Background Halo */}
+                  {hasPortal && (
+                    <div className={`absolute inset-0.5 rounded-lg border border-dashed animate-[spin_10s_linear_infinite] pointer-events-none z-0 ${portalStyle!.pulse}`} />
+                  )}
+
                   {/* Glass backing design details */}
                   <span className="absolute inset-0.5 rounded-md border border-white/5 pointer-events-none" />
 
@@ -617,8 +696,12 @@ export default function GameBoard({
                       }}
                       id={`letter-tile-${cell.id}`}
                     >
-                      {/* Interactive Visual Tile Character - Image mapped */}
-                      {cell.special === 'HYPER_EXPLODER' ? (
+                      {/* Interactive Visual Tile Character - Image mapped or Stone Cover */}
+                      {cell.isStone ? (
+                        <div className="w-[85%] h-[85%] rounded-xl bg-gradient-to-br from-slate-500 via-slate-600 to-slate-700 border border-slate-400/50 shadow-inner flex items-center justify-center relative select-none z-10">
+                          <span className="text-lg sm:text-xl font-black text-slate-300 filter drop-shadow animate-[pulse_2s_infinite]">🪨</span>
+                        </div>
+                      ) : cell.special === 'HYPER_EXPLODER' ? (
                         <img 
                           src={pic0} 
                           className="w-13/16 h-13/16 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.65)] animate-[pulse_1.5s_infinite_ease-in-out]" 
@@ -661,12 +744,29 @@ export default function GameBoard({
                         <div className={`absolute inset-0 rounded-xl bg-cyan-300/10 border-2 transition-all duration-300 ${
                           isIceHighlightActive
                             ? 'border-cyan-300 ring-4 ring-cyan-400 ring-offset-1 ring-offset-slate-950 bg-cyan-400/40 shadow-[0_0_25px_rgba(34,211,238,1.0),inset_0_0_12px_rgba(255,255,255,1.0)] scale-105 z-20 animate-pulse'
+                            : cell.iceLevel === 2
+                            ? 'border-cyan-200 border-[3px] bg-blue-500/20 shadow-[inset_0_0_12px_rgba(34,211,238,0.7)] z-10'
                             : 'border-cyan-400/40 shadow-[inset_0_0_8px_rgba(34,211,238,0.5)] z-10'
                         } overflow-hidden pointer-events-none`}>
                           {/* Frozen cracks detail on corners so it looks icy but leaves the center clear */}
                           <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-cyan-400/10 to-transparent pointer-events-none" />
                           <div className="absolute top-0 right-0 w-3.5 h-3.5 bg-cyan-200/30 rounded-bl-lg" />
                           <div className="absolute bottom-0 left-0 w-3.5 h-3.5 bg-cyan-200/30 rounded-tr-lg" />
+                          
+                          {/* Heavy overlay cracks or layers count indicator */}
+                          {cell.iceLevel === 2 && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <span className="text-[10px] font-black text-cyan-100 font-sans tracking-widest bg-blue-600/70 px-1 py-0.5 rounded leading-none border border-cyan-300 transform scale-90">×2</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Vines / Leaves Overlay */}
+                      {cell.isVined && (
+                        <div className="absolute inset-0 rounded-xl bg-emerald-950/25 border-2 border-emerald-500 shadow-[inset_0_0_8px_rgba(16,185,129,0.6)] z-10 pointer-events-none">
+                          <span className="absolute -top-1 -right-0.5 text-[10px] select-none">🍃</span>
+                          <span className="absolute -bottom-1 -left-0.5 text-[10px] select-none">🌿</span>
                         </div>
                       )}
 
