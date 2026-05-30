@@ -16,6 +16,28 @@ import { Volume2, VolumeX, Sparkles, RefreshCcw, ArrowRight } from 'lucide-react
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from './utils/i18n';
 
+// Import assets directly for high-performance preloading
+import pic0 from '../pic/0.png';
+import pic1 from '../pic/1.png';
+import pic2 from '../pic/2.png';
+import pic3 from '../pic/3.png';
+import pic4 from '../pic/4.png';
+import pic5 from '../pic/5.png';
+import pic6 from '../pic/6.png';
+import startPic from '../pic/start.jpg';
+import alipayPic from '../pay/alipay.jpg';
+import wechatPic from '../pay/wechat.png';
+import flagUsa from '../country/usa.png';
+import flagChina from '../country/china.png';
+import flagGermany from '../country/germany.png';
+import flagJapan from '../country/japan_.png';
+import flagIndia from '../country/India.png';
+import flagFrance from '../country/france.png';
+import flagKorea from '../country/korea.png';
+import flagSpain from '../country/Spain.png';
+import flagBrazil from '../country/brazil.png';
+import flagVietnam from '../country/vietnam.png';
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default function App() {
@@ -113,6 +135,21 @@ export default function App() {
         clearTimeout(vinedHighlightTimeoutRef.current);
       }
     };
+  }, []);
+
+  // Prepreload all images, icons, and flags to ensure 0ms rendering latency and absolutely no flickering
+  useEffect(() => {
+    const assets = [
+      pic0, pic1, pic2, pic3, pic4, pic5, pic6,
+      startPic, alipayPic, wechatPic,
+      flagUsa, flagChina, flagGermany, flagJapan, flagIndia,
+      flagFrance, flagKorea, flagSpain, flagBrazil, flagVietnam
+    ];
+    // Warm-up browser cache
+    assets.forEach(src => {
+      const img = new Image();
+      img.src = src;
+    });
   }, []);
 
   // Sync Audio Setting

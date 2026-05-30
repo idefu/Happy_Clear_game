@@ -160,31 +160,16 @@ export default function GameBoard({
         // HIGH PERFORMANCE: shadowBlur is deleted because it crashes mobile GPU
 
         if (p.type === 'sparkle') {
-          // Draw a small star
+          // HIGH PERFORMANCE: Circular mini twinkle or magical 4-point diamond with 0 trig computations
           ctx.beginPath();
-          const spikes = 5;
-          const outerRadius = p.size;
-          const innerRadius = p.size / 2;
-          let rot = (Math.PI / 2) * 3;
-          let cx = p.x;
-          let cy = p.y;
-          let x = cx;
-          let y = cy;
-          let step = Math.PI / spikes;
-
-          ctx.moveTo(cx, cy - outerRadius);
-          for (let s = 0; s < spikes; s++) {
-            x = cx + Math.cos(rot) * outerRadius;
-            y = cy + Math.sin(rot) * outerRadius;
-            ctx.lineTo(x, y);
-            rot += step;
-
-            x = cx + Math.cos(rot) * innerRadius;
-            y = cy + Math.sin(rot) * innerRadius;
-            ctx.lineTo(x, y);
-            rot += step;
+          if (p.size < 3) {
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          } else {
+            ctx.moveTo(p.x, p.y - p.size);
+            ctx.lineTo(p.x + p.size * 0.6, p.y);
+            ctx.lineTo(p.x, p.y + p.size);
+            ctx.lineTo(p.x - p.size * 0.6, p.y);
           }
-          ctx.lineTo(cx, cy - outerRadius);
           ctx.closePath();
           ctx.fill();
         } else if (p.type === 'ring') {
@@ -679,7 +664,7 @@ export default function GameBoard({
                           ? { repeat: Infinity, duration: 1.4, ease: "easeInOut" }
                           : cell.isNew 
                           ? { type: 'spring', stiffness: 450, damping: 28 }
-                          : { type: 'spring', stiffness: 500, damping: 30 }
+                          : { duration: 0.15, ease: "easeOut" }
                       }
                       className={`relative flex items-center justify-center w-full h-full aspect-square rounded-2xl shadow-lg border group cursor-grab active:cursor-grabbing select-none transition-shadow duration-150 ${
                         cell.special === 'HYPER_EXPLODER' 
@@ -695,7 +680,8 @@ export default function GameBoard({
                       style={{
                         background: cell.special === 'HYPER_EXPLODER'
                           ? 'radial-gradient(circle, #1a202c 0%, #0a0f1d 100%)'
-                          : `linear-gradient(135deg, ${letterColors[cell.letter]}12 0%, ${letterColors[cell.letter]}25 100%)`
+                          : `linear-gradient(135deg, ${letterColors[cell.letter]}12 0%, ${letterColors[cell.letter]}25 100%)`,
+                        willChange: 'transform, opacity'
                       }}
                       id={`letter-tile-${cell.id}`}
                     >
